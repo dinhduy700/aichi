@@ -1,0 +1,20 @@
+<?php
+return [
+    'nyukin_dt' => '入金日',
+    //'kyoten_cd' => '拠点コード',
+    'nyukin_no' => '入金NO',
+    'ninusi_cd' => '荷主コード',
+    'ninusi1_nm' => '荷主名',
+    'genkin_kin' => '現金',
+    'furikomi_kin' => '振込',
+    'furikomi_tesuryo_kin' => '振込手数料',
+    'tegata_kin' => '手形',
+    'sousai_kin' => '相殺',
+    'nebiki_kin' => '値引',
+    'sonota_nyu_kin' => 'その他',
+    'tegata_kijitu_kin' => '手形期日',
+    //'biko_cd' => '備考コード',
+    'biko' => '備考',
+    'seikyu_sime_dt' => '請求締日',
+    'hikiate_simebi_dt' => '引当締日',
+];

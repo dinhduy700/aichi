@@ -1,0 +1,27 @@
+<?php
+return [
+    'bumon_cd' => '部門コード',
+    'bumon_nm' => '部門名',
+    'soko_cd' => '倉庫コード',
+    'soko_nm' => '倉庫名',
+    'kijyun_dt' => '基準日',
+    'ninusi_cd' => '荷主コード',
+    'ninusi_ryaku_nm' => '荷主名',
+    'hinmei_cd' => '商品コード',
+    'hinmei_nm' => '商品名',
+    'kikaku' => '商品規格',
+    'lot1' => 'ロット番号１',
+    'lot2' => 'ロット番号２',
+    'lot3' => 'ロット番号３',
+    'case_su' => '在庫ケース',
+    'hasu' => '在庫端数',
+    'sousu' => '在庫総数',
+    'irisu' => '入数',
+    'case_cd' => 'ケース単位コード',
+    'case_nm' => 'ケース単位名',
+    'bara_tani' => '単位コード',
+    'bara_tani_nm' => '単位名',
+    'jyuryo' => '在庫重量',
+    'uke_tanka' => '受寄物単価',
+    'kingaku' => '在庫金額'
+];
