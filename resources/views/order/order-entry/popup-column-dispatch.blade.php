@@ -46,6 +46,12 @@
               </div>
               <div class="form-check form-check-flat form-check-primary">
                 <label class="form-check-label text-nowrap">
+                <input type="checkbox" class="form-check-input" name="syuka_dt" value="1" >集荷日
+                <i class="input-helper"></i>
+                </label>
+              </div>
+              <div class="form-check form-check-flat form-check-primary">
+                <label class="form-check-label text-nowrap">
                 <input type="checkbox" class="form-check-input" name="haitatu_dt" value="1" >配達日
                 <i class="input-helper"></i>
                 </label>
@@ -92,28 +98,20 @@
                 <i class="input-helper"></i>
                 </label>
               </div>
-              {{--
-              <div class="form-check form-check-flat form-check-primary">
-                <label class="form-check-label text-nowrap">
-                <input type="checkbox" class="form-check-input" name="syuka_dt" value="1" >集荷日
-                <i class="input-helper"></i>
-                </label>
-              </div>
-              --}}
               <div class="form-check form-check-flat form-check-primary">
                 <label class="form-check-label text-nowrap">
                 <input type="checkbox" class="form-check-input" name="unso_dt" value="1" >運送日
                 <i class="input-helper"></i>
                 </label>
               </div>
+        </div>
+        <div class="col-md-6">
               <div class="form-check form-check-flat form-check-primary">
                 <label class="form-check-label text-nowrap">
                 <input type="checkbox" class="form-check-input" name="jisya_km" value="1" >実車km
                 <i class="input-helper"></i>
                 </label>
               </div>
-        </div>
-        <div class="col-md-6">
               <div class="form-check form-check-flat form-check-primary">
                 <label class="form-check-label text-nowrap">
                 <input type="checkbox" class="form-check-input" name="hinmei_cd" value="1" onclick="initColumnCheckHidden(this, ['hinmoku_nm', 'hinmei_nm'])">品名CD/品目名/品名

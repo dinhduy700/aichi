@@ -46,18 +46,21 @@ class UriageRepository
         $tUriage = new TUriage();
         $table = $tUriage->getTable();
         $qb = $tUriage->newQuery()->filter($request);// $qb = new Builder();
-        $qb->select("{$table}.*");
+        $qb->select("{$table}.*", DB::raw('t_uriage.hatuti_hachaku_nm as hatuti_nm'));
         // 部門マスタ
         $qb->joinMBumon()->addSelect("m_bumon.bumon_nm");
         // 荷主マスタ
         $qb->joinMNinusi()->addSelect("m_ninusi.ninusi_ryaku_nm");
         // 発地着地マスタ
-        $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
-        $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
+        // $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
+        $qb->joinMHachaku();
+        // $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
+        $qb->JoinHatuti();
         // 庸車先マスタ
         $qb->joinMYousya()->addSelect("yousya1_nm");
         // 品名マスタ, 品目マスタ
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        // $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["m_hinmei.hinmoku_cd", "hinmoku_nm"]);
         // 乗務員マスタ
         $qb->joinMJyomuin()->addSelect("m_jyomuin.jyomuin_nm");
         // 名称マスタ
@@ -255,10 +258,13 @@ class UriageRepository
         $qb->select("{$table}.*");
         $qb->joinMBumon("left")->addSelect("bumon_nm");
         $qb->joinMNinusi("left")->addSelect("m_ninusi.ninusi_ryaku_nm as ninusi_nm");
-        $qb->joinMHachaku("left")->addSelect("m_hachaku.hachaku_nm");
-        $qb->JoinHatuti("left")->addSelect(["m_hatuti.hachaku_nm AS hatuti_nm", 'm_hatuti.hachaku_cd as hatuti_cd']);
+        // $qb->joinMHachaku("left")->addSelect("m_hachaku.hachaku_nm");
+        $qb->joinMHachaku("left");
+        // $qb->JoinHatuti("left")->addSelect(["m_hatuti.hachaku_nm AS hatuti_nm", 'm_hatuti.hachaku_cd as hatuti_cd']);
+        $qb->JoinHatuti("left");
         $qb->joinMYousya("left")->addSelect("yousya1_nm as yousya_nm");
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        // $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["m_hinmei.hinmoku_cd", "hinmoku_nm"]);
         $qb->joinMMeisyoTani("left")->addSelect("m_meisyo_tani.meisyo_nm AS tani_nm");
         $qb->joinMMeisyoGyosya("left")->addSelect("m_meisyo_gyosya.meisyo_nm AS gyosya_nm");
         $qb->joinMJyomuin("left")->addSelect("jyomuin_nm");
@@ -532,7 +538,20 @@ class UriageRepository
                                 if(!empty($item['haitatu_dt']) && !empty($item['ninusi_cd'])) {
                                     $this->__setSeikyuSimeDt($item);
                                 }
-
+                                if(request()->route()->getName() == 'jyutyu.order_entry.update_datatable' || request()->route()->getName() == 'order.order_entry.update_datatable_dispatch') {
+                                    if(empty($uriage->unso_dt)) {
+                                        $item['unso_dt'] = !empty($item['syuka_dt']) ? $item['syuka_dt'] : null;
+                                    }
+                                    if(empty($uriage->nipou_dt)) {
+                                        $item['nipou_dt'] = !empty($item['syuka_dt']) ? $item['syuka_dt'] : null;
+                                    }
+                                }
+                                if(request()->route()->getName() == 'jyutyu.order_entry.update_datatable') {
+                                    if(!empty($item['haitatu_dt'])) {
+                                        $item['unso_dt'] = $item['haitatu_dt'];
+                                        $item['nipou_dt'] = $item['haitatu_dt'];
+                                    }
+                                }
                                 $uriage->update($item);
                             }
                         }
@@ -577,6 +596,23 @@ class UriageRepository
                         }
 
                         $item['sime_kakutei_kbn'] = 0;
+
+                        if(request()->route()->getName() == 'jyutyu.order_entry.update_datatable' || request()->route()->getName() == 'order.order_entry.update_datatable_dispatch') {
+                            if(empty($item['unso_dt'])) {
+                                $item['unso_dt'] = !empty($item['syuka_dt']) ? $item['syuka_dt'] : null;
+                            }
+                            if(empty($item['nipou_dt'])) {
+                                $item['nipou_dt'] = !empty($item['syuka_dt']) ? $item['syuka_dt'] : null;
+                            }
+                        }
+
+                        if(request()->route()->getName() == 'jyutyu.order_entry.update_datatable') {
+                            if(!empty($item['haitatu_dt'])) {
+                                $item['unso_dt'] = $item['haitatu_dt'];
+                                $item['nipou_dt'] = $item['haitatu_dt'];
+                            }
+                        }
+
                         TUriage::create($item);
                     }
                 }

@@ -32,8 +32,8 @@ class JyutyuRequest extends FormRequest
                     'exp.hachaku_cd_from' => 'nullable|exists:m_hachaku,hachaku_cd',
                     'exp.hachaku_cd_to' => 'nullable|exists:m_hachaku,hachaku_cd',
 
-                    'exp.syuka_dt_from' => 'nullable|date_format:Y/m/d',
-                    'exp.syuka_dt_to' => 'nullable|date_format:Y/m/d',
+                    'exp.dt_from' => 'nullable|date_format:Y/m/d',
+                    'exp.dt_to' => 'nullable|date_format:Y/m/d',
 
                     'exp.ninusi_cd_from' => 'nullable|exists:m_ninusi,ninusi_cd',
                     'exp.ninusi_cd_to' => 'nullable|exists:m_ninusi,ninusi_cd',
@@ -62,8 +62,8 @@ class JyutyuRequest extends FormRequest
             'exp.hatuti_cd_to' => '発地To',
             'exp.hachaku_cd_from' => '着地From',
             'exp.hachaku_cd_to' => '着地To',
-            'exp.syuka_dt_from' => '集荷日From',
-            'exp.syuka_dt_to' => '集荷日To',
+            'exp.dt_from' => '集荷日From',
+            'exp.dt_to' => '集荷日To',
             'exp.ninusi_cd_from' => '荷主コードFrom',
             'exp.ninusi_cd_to' => '荷主コードTo',
             'exp.jyutyu_kbn_from' => '受注区分From',

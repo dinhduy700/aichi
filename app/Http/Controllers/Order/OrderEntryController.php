@@ -122,6 +122,7 @@ class OrderEntryController extends Controller
                             $tmpRowData[$key] = str_replace("-", "/", $rowData->$key);
                         }
                     }
+                    $tmpRowData["sime_kakutei_kbn"] = $rowData->sime_kakutei_kbn;
                     if (count($tmpRowData) > 0) {
                         $filterData[] = $tmpRowData;
                     }
@@ -141,6 +142,7 @@ class OrderEntryController extends Controller
 
     public function valdateFormSearchUriage(UriageFormSearchRequest $request)
     {   
+        $this->updateInitSearch($request);
         return response()->json([
             'status' => Response::HTTP_OK,
         ]);
@@ -1286,6 +1288,16 @@ class OrderEntryController extends Controller
             ],
             'hed_syuka_dt_to' => [
                 'index' => 77,
+            ],
+            'jyomuin_cd_from' => [
+                'index' => 78,
+                'table' => 'm_jyomuin',
+                'column' => 'jyomuin_cd'
+            ],
+            'jyomuin_cd_to' => [
+                'index' => 79,
+                'table' => 'm_jyomuin',
+                'column' => 'jyomuin_cd'
             ]
         ];
     }
@@ -1364,139 +1376,145 @@ class OrderEntryController extends Controller
             'jikoku_to' => [
                 'index' => 23
             ],
-            'tyuki_from' => [
+            'syuka_dt_from' => [
                 'index' => 24,
             ],
-            'tyuki_to' => [
+            'syuka_dt_to' => [
                 'index' => 25,
             ],
-            'haitatu_jyusyo1_from' => [
+            'tyuki_from' => [
                 'index' => 26,
             ],
-            'haitatu_jyusyo1_to' => [
+            'tyuki_to' => [
                 'index' => 27,
             ],
-            'haitatu_jyusyo2_from' => [
+            'haitatu_jyusyo1_from' => [
                 'index' => 28,
             ],
-            'haitatu_jyusyo2_to' => [
+            'haitatu_jyusyo1_to' => [
                 'index' => 29,
             ],
-            'haitatu_atena_from' => [
+            'haitatu_jyusyo2_from' => [
                 'index' => 30,
             ],
-            'haitatu_atena_to' => [
+            'haitatu_jyusyo2_to' => [
                 'index' => 31,
             ],
-            'haitatu_tel_from' => [
+            'haitatu_atena_from' => [
                 'index' => 32,
             ],
-            'haitatu_tel_to' => [
+            'haitatu_atena_to' => [
                 'index' => 33,
             ],
-            'haitatu_fax_from' => [
+            'haitatu_tel_from' => [
                 'index' => 34,
             ],
-            'haitatu_fax_to' => [
+            'haitatu_tel_to' => [
                 'index' => 35,
             ],
+            'haitatu_fax_from' => [
+                'index' => 36,
+            ],
+            'haitatu_fax_to' => [
+                'index' => 37,
+            ],
             'unso_dt_from' => [
-                'index' => 36
-            ],
-            'unso_dt_to' => [
-                'index' => 37
-            ],
-            'jisya_km_from' => [
                 'index' => 38
             ],
-            'jisya_km_to' => [
+            'unso_dt_to' => [
                 'index' => 39
             ],
+            'jisya_km_from' => [
+                'index' => 40
+            ],
+            'jisya_km_to' => [
+                'index' => 41
+            ],
             'hinmei_cd_from' => [
-                'index' => 40,
+                'index' => 42,
                 'table' => 'm_hinmei'
             ],
             'hinmei_cd_to' => [
-                'index' => 41,
+                'index' => 43,
                 'table' => 'm_hinmei'
             ],
             'su_from' => [
-                'index' => 42
+                'index' => 44
             ],
             'su_to' => [
-                'index' => 43
+                'index' => 45
             ],
             'tani' => [
-                'index' => 44,
+                'index' => 46,
                 'table' => 'm_meisyo_tani',
                 'column' => 'meisyo_cd'
             ],
             'unchin_kin_from' => [
-                'index' => 45
-            ],
-            'unchin_kin_to' => [
-                'index' => 46
-            ],
-            'tyukei_kin_from' => [
                 'index' => 47
             ],
-            'tyukei_kin_to' => [
+            'unchin_kin_to' => [
                 'index' => 48
             ],
-            'tukoryo_kin_from' => [
+            'tyukei_kin_from' => [
                 'index' => 49
             ],
-            'tukoryo_kin_to' => [
+            'tyukei_kin_to' => [
                 'index' => 50
             ],
-            'syuka_kin_from' => [
+            'tukoryo_kin_from' => [
                 'index' => 51
             ],
-            'syuka_kin_to' => [
+            'tukoryo_kin_to' => [
                 'index' => 52
             ],
-            'syaryo_kin_from' => [
+            'syuka_kin_from' => [
                 'index' => 53
             ],
-            'syaryo_kin_to' => [
+            'syuka_kin_to' => [
                 'index' => 54
             ],
-            'unten_kin_from' => [
+            'syaryo_kin_from' => [
                 'index' => 55
             ],
-            'unten_kin_to' => [
+            'syaryo_kin_to' => [
                 'index' => 56
             ],
-            'yosya_tyukei_kin_from' => [
+            'unten_kin_from' => [
                 'index' => 57
             ],
-            'yosya_tyukei_kin_to' => [
+            'unten_kin_to' => [
                 'index' => 58
             ],
-            'yosya_tukoryo_kin_from' => [
+            'yosya_tyukei_kin_from' => [
                 'index' => 59
             ],
-            'yosya_tukoryo_kin_to' => [
+            'yosya_tyukei_kin_to' => [
                 'index' => 60
             ],
+            'yosya_tukoryo_kin_from' => [
+                'index' => 61
+            ],
+            'yosya_tukoryo_kin_to' => [
+                'index' => 62
+            ],
             'biko' => [
-                'index' => 61, 
+                'index' => 63, 
                 'table' => 't_uriage',
                 'type_where' => 'like_after'
             ],
             'add_tanto_cd_from' => [
-                'index' => 62,
+                'index' => 64,
                 'table' => 't_uriage',
             ],
             'add_tanto_cd_to' => [
-                'index' => 63,
+                'index' => 65,
                 'table' => 't_uriage',
             ],
             'uriage_den_no_from' => [
-                'index' => 64,
+                'index' => 66,
             ],
             'uriage_den_no_to' => [
-                'index' => 65,
+                'index' => 67,
             ],
         ];
     }

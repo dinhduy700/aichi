@@ -68,14 +68,14 @@
                 <div class="col-sm form-inline">
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_from" onchange="autoFillDate(this)"> 
+                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_from" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_syuka_dt_from]'), $('input[name=hed_syuka_dt_to]'), 1)"> 
                     </div>
                     <div class="error-message-row"></div>
                   </div>
                   <span class="px-2"> ～ </span>
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_to" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_syuka_dt_from]'), $('input[name=hed_syuka_dt_to]'), 2)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
@@ -136,14 +136,14 @@
                 <div class="col-sm form-inline">
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_from" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_from" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_haitatu_dt_from]'), $('input[name=hed_haitatu_dt_to]'), 1)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
                   <span class="px-2"> ～ </span>
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_to" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_haitatu_dt_from]'), $('input[name=hed_haitatu_dt_to]'), 2)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
@@ -203,6 +203,7 @@
 
               </div>
               <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="applyClearAllInput('#popupSearchModal')">クリア</button>
                 <button type="button" class="btn btn-primary" onclick="applyInitSearch()">保存</button>
                 <button type="button" class="btn btn-secondary" onclick="notAppyInitSearch()">閉じる</button>
               </div>
@@ -324,7 +325,10 @@
     readonlyRowWhere: '!=0',
     defaultSearchForm: false,
     isShow: false, // if is true will be show list when init
-    usingPaginateTop: true
+    usingPaginateTop: true,
+    isResize: true,
+    focusAfterName: 'bumon_cd',
+    isCopyActiveRow: true
   });
   // $("input[name='hed_bumon_cd']").val('');
 
@@ -655,7 +659,7 @@
         data: {
           field_from: 'ninusi_cd',
           value_from: ninusiCd,
-          field_to: ['hachaku_cd']
+          field_to: ['hachaku_cd', 'haitatu_tel']
         },
         method: 'POST',
         success: function(res) {
@@ -663,9 +667,79 @@
             _tr.find('[name="hachaku_cd"]').val(res.data.hachaku_cd[0].hachaku_cd).addClass('hasChangeValue').trigger('change');
             _tr.find('[name="hachaku_nm"]').val(res.data.hachaku_cd[0].hachaku_nm).addClass('hasChangeValue');
           }
+          if(res.data && res.data.haitatu_tel && res.data.haitatu_tel.length == 1) {
+            _tr.find('[name="haitatu_tel"]').val(res.data.haitatu_tel[0].tel).addClass('hasChangeValue');
+          }
         }
       })
     }
+  }
+
+  function onchangeHinmeiCd(e) {
+    var hinmeiCd = $(e).parents('tr').find('[name="hinmei_cd"]').val();
+    var _tr = $(e).parents('tr');
+    if(hinmeiCd) {
+      $.ajax({
+        url: '{{route('uriage.uriage_entry.other_column')}}',
+        data: {
+          field_from: 'hinmei_cd',
+          value_from: hinmeiCd,
+          field_to: ['tani_cd']
+        },
+        method: 'POST',
+        success: function(res) {
+          if(res.data && res.data.tani_cd && res.data.tani_cd.length == 1) {
+            _tr.find('[name="tani_cd"]').val(res.data.tani_cd[0].tani_cd).addClass('hasChangeValue').trigger('change');
+            _tr.find('[name="tani_nm"]').val(res.data.tani_cd[0].tani_nm).addClass('hasChangeValue');
+          }
+        }
+      })
+    }
+  }
+
+  function formatterFooter(column, index) {
+    if(column.field == 'syuka_dt') {
+      return '<td><input onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" type="text" class="form-control" name="syuka_dt" data-key="column_8" placeholder="集荷日" autocomplete="off" onchange="autoFillDate(this), onchangeSyukaDt(this)"></td>';
+    }
+
+    if(column.field == 'unchin_kin') {
+      return '<td><input onkeypress="onlyNumber(event)" type="text" class="form-control text-right" name="unchin_kin" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)" onchange="onchangeUnchinKin(this)"></td>';
+    }
+    if(column.field == 'ninusi_cd') {
+      return '<td><div class="div-row" data-field="ninusi_cd"><input onblur="setCellFocusStatus($(this), false), outFocusSuggestion(this)" onfocus="setCellFocusStatus($(this), true)" type="text" onkeyup="suggestionKeyup(this)" class="form-control" name="ninusi_cd" value="" placeholder="荷主CD" autocomplete="off" onchange="onchangeNinusi(this)"><div class="error error-ninusi_cd"><span class="text-danger"></span></div></div></td>';
+    }
+
+    if(column.field == 'hinmei_cd') {
+      return '<td><div class="div-row" data-field="hinmei_cd"><input onblur="setCellFocusStatus($(this), false), outFocusSuggestion(this)" onfocus="setCellFocusStatus($(this), true)" type="text" onkeyup="suggestionKeyup(this)" class="form-control" name="hinmei_cd" value="" placeholder="品名CD" autocomplete="off" onchange="onchangeHinmeiCd(this)"><div class="error error-hinmei_cd"><span class="text-danger"></span></div></div></td>';
+    }
+    return '<td></td>';
+  }
+
+  function formaterSyukaDt(value, index, row, field) {
+    return '<div class="div-row" data-field="syuka_dt"><input style="text-align: center" type="text" name="syuka_dt" class="form-control" value="'+formatDateGrid(value || -1, row, index)+'" autocomplete="off" onchange="autoFillDate(this), onchangeSyukaDt(this)" onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)"><div class="error error-syuka_dt"><span class="text-danger"></span></div></div>';
+  }
+
+  function formatterUnchinKin(value, index, row, field) {
+    return '<div class="div-row" data-field="unchin_kin"><input onkeypress="onlyNumber(event)" type="text" data-length="11" class="form-control text-right" name="unchin_kin" value="'+numberFormat(value || '', -1)+'" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)" onchange="onchangeUnchinKin(this)"><div class="error error-unchin_kin"><span class="text-danger"></span></div></div>';
+  }
+
+  function onchangeSyukaDt(e) {
+    var value = $(e).val();
+    // if($(e).parents('tr').find('[name="haitatu_dt"]').val() == '') {
+    //   $(e).parents('tr').find('[name="haitatu_dt"]').val(value).addClass('hasChangeValue');
+    // }
+    // if($(e).parents('tr').find('[name="unso_dt"]').val() == '') {
+    //   $(e).parents('tr').find('[name="unso_dt"]').val(value).addClass('hasChangeValue');
+    // }
+    $(e).parents('tr').find('[name="haitatu_dt"]').val(value).addClass('hasChangeValue');
+    $(e).parents('tr').find('[name="unso_dt"]').val(value).addClass('hasChangeValue');
+    $(e).parents('tr').find('[name="nipou_dt"]').val(value).addClass('hasChangeValue');
+  }
+
+  function onchangeUnchinKin(e) {
+    var value = $(e).val();
+    $(e).parents('tr').find('[name="syaryo_kin"]').val(numberFormat(value || '', -1));
+    $(e).parents('tr').find('[name="unten_kin"]').val(numberFormat(value || '', -1));
   }
 
   $(document).ready(function() {

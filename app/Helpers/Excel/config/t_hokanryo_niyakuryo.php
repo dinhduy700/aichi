@@ -185,8 +185,16 @@ return [
             }],
             //保管料　単価
             'L' => ['field' => 'tanka', 'mergeCells' => ['w'=>3, 'h'=>1]],
-            //荷役料　入庫
-            'O' => ['field' => 'nyuko_su'],
+            //荷役料　入庫 - nyuko_su
+            'O' => ['value' => function($row) use ($suFunc) {
+                $res = 0;
+
+                if (!empty(data_get($row, 'irisu'))) {
+                   $res = ceil(data_get($row, 'nyuko_su') / data_get($row, 'irisu'));
+                }
+               
+                return $res;
+            }],
             //荷役料　入庫単価
             'P' => ['field' => 'nyuko_tanka'],
             //荷役料　入庫料
@@ -211,12 +219,29 @@ return [
             'J' => ['value' => function($row) use ($suFunc) {
                 return $suFunc($row, 'touzan');
             }],
-            //保管料　積数
-            'K' => ['field' => 'seki_su'],
+            //保管料　積数 -- seki_su
+            'K' => ['value' => function($row) use ($suFunc) {
+               
+                $res = 0;
+
+                if (!empty(data_get($row, 'irisu'))) {
+                   $res = ceil(data_get($row, 'seki_su') / data_get($row, 'irisu'));
+                }
+               
+                return $res;
+            }],
             //保管料　保管料
             'L' => ['field' => 'hokan_kin', 'mergeCells' => ['w'=>3, 'h'=>1]],
-            //荷役料　出庫
-            'O' => ['field' => 'syuko_su'],
+            //荷役料　出庫 -- syuko_su
+            'O' => ['value' => function($row) use ($suFunc) {
+                $res = 0;
+
+                if (!empty(data_get($row, 'irisu'))) {
+                   $res = ceil(data_get($row, 'syuko_su') / data_get($row, 'irisu'));
+                }
+               
+                return $res;
+            }],
             //荷役料　出庫単価
             'P' => ['field' => 'syuko_tanka'],
             //荷役料　出庫料

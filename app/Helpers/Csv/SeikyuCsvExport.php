@@ -48,6 +48,9 @@ class SeikyuCsvExport extends CsvExport
             $groupedTNyukin = $repo->csvDetailTNyukin($req)->get()->groupBy('ninusi_cd');
         }
 
+        // ROWS t_zaiko_hokanryo
+        $arrZaikoHokanryoByNinusiCd = $repo->getSumKinZaikoHokanryo($req)->get()->keyBy('ninusi_cd');
+
         // ROW TOTAL 
         if ($repo->csvTotalRow($req)->count() == 0) {
             \Log::info(print_r('csvDetailTNyukin is empty', TRUE) );
@@ -72,6 +75,18 @@ class SeikyuCsvExport extends CsvExport
                     $arrDetaiTNyukin = $this->prepareDetailNyukin($groupedTNyukin, $ninusiCd)->toArray();
                     $output[$ninusiCd] = array_merge($output[$ninusiCd], $arrDetaiTNyukin);
                 }
+            }
+
+            if (isset($arrZaikoHokanryoByNinusiCd[$ninusiCd])
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'seki_su') != null
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'hokan_kin') != null
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'nyuko_su') != null
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'nyuko_kin') != null
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'syuko_su') != null
+                && data_get($arrZaikoHokanryoByNinusiCd[$ninusiCd], 'syuko_kin') != null
+            ) {
+                $arrZaikoHokanryo = $this->prepareZaikoHokanryo($arrZaikoHokanryoByNinusiCd, $ninusiCd);
+                $output[$ninusiCd] = array_merge($output[$ninusiCd], $arrZaikoHokanryo);
             }
 
             if (isset($arrTotal[$ninusiCd])) {
@@ -238,6 +253,46 @@ class SeikyuCsvExport extends CsvExport
 
         return $result;
       
+    }
+
+    private function prepareZaikoHokanryo($arrZaikoHokanryoByNinusiCd, $ninusiCd)
+    {   
+        $filteredZaikoHokanryo = data_get($arrZaikoHokanryoByNinusiCd, $ninusiCd);
+       
+        $arrTmp = [];
+       
+        $configs = [
+            1 => [
+                'hinmei_nm' => '保管料',
+                'su_key' => 'seki_su',
+                'nieki_kin_key' => 'hokan_kin'
+            ],
+            2 => [
+                'hinmei_nm' => '入庫料',
+                'su_key' => 'nyuko_su',
+                'nieki_kin_key' => 'nyuko_kin'
+            ],
+            3 => [
+                'hinmei_nm' => '出庫料',
+                'su_key' => 'syuko_su',
+                'nieki_kin_key' => 'syuko_kin'
+            ]
+        ];
+
+        foreach ($configs as $key => $config) {
+            data_set($arrTmp[$key], 'seikyu_shimebi', data_get($filteredZaikoHokanryo, 'seikyu_sime_dt'));
+            data_set($arrTmp[$key], 'seikyu_gp_1', data_get($filteredZaikoHokanryo, 'ninusi_cd'));
+            data_set($arrTmp[$key], 'seikyu_saki_kodo', data_get($filteredZaikoHokanryo, 'ninusi_cd'));
+            data_set($arrTmp[$key], 'ninushi_kodo', data_get($filteredZaikoHokanryo, 'ninusi_cd'));
+            data_set($arrTmp[$key], 'deta_kbn', 1);
+            data_set($arrTmp[$key], 'dt', data_get($filteredZaikoHokanryo, 'seikyu_sime_dt'));
+            data_set($arrTmp[$key], 'meisai_kbn', 3);
+            data_set($arrTmp[$key], 'hinmei_nm', $config['hinmei_nm']);
+            data_set($arrTmp[$key], 'su', data_get($filteredZaikoHokanryo, $config['su_key']));
+            data_set($arrTmp[$key], 'nieki_kin', data_get($filteredZaikoHokanryo, $config['nieki_kin_key']));
+        }
+
+        return $arrTmp;
     }
 
     private function getConfg()

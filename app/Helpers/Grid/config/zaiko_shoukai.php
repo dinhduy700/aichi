@@ -11,7 +11,9 @@ return [
     [
         'title' => '商品CD',
         'field' => 'hinmei_cd',
-        'class' => 'size-M'
+        'class' => 'size-M',
+        'halign' => 'center',
+        'align' => 'right'
     ],
     [
         'title' => '商品名',
@@ -27,11 +29,13 @@ return [
         'title' => '入数',
         'field' => 'irisu',
         'width' => '75',
-        'align' => 'right'
+        'halign' => 'center',
+        'align' => 'right',
     ],
     [
         'title' => '在庫ケース数',
-        'formatter' => 'formatZaikoCaseSu',
+        'field' => 'zaiko_case_su',
+        'formatter' => 'formatNumber',
         'class' => 'size-M',
         'align' => 'right'
     ],
@@ -43,13 +47,15 @@ return [
 
     [
         'title' => '在庫端数',
-        'formatter' => 'formatZaikoHaSu',
+        'field' => 'zaiko_hasu',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right'
     ],
     [
         'title' => '在庫総数',
         'field' => 'zaiko_su',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right'
     ],
@@ -60,7 +66,8 @@ return [
     ],
     [
         'title' => '在庫重量kg',
-        'formatter' => 'formatZaikoJuryo',
+        'field' => 'zaiko_jyuryo',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right'
     ],

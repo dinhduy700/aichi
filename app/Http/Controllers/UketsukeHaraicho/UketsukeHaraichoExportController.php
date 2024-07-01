@@ -7,6 +7,7 @@ use App\Helpers\Excel\XlsUketsukeHaraicho;
 use App\Http\Repositories\UketsukeHaraichoRepository;
 use App\Http\Requests\UketsukeHaraichoRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 
 class UketsukeHaraichoExportController
@@ -77,8 +78,22 @@ class UketsukeHaraichoExportController
             if (empty(data_get($row, 'nyusyuko_den_no'))) {
                 return $expRow;
             }
+            $arrConvertType = [
+                'in_case_su',
+                'in_hasu',
+                'in_su',
+                'in_jyuryo',
+                'out_case_su',
+                'out_hasu',
+                'out_su',
+                'out_jyuryo',
+            ];
             foreach (array_keys($mapping) as $k) {
-                $expRow[$k] = data_get($row, $k, '');
+                if (in_array($k, $arrConvertType)) {
+                    $expRow[$k] = round(data_get($row, $k, ''), 3);
+                } else {
+                    $expRow[$k] = data_get($row, $k, '');
+                }
             }
             $arrReCalSu = $rows->filter(function ($item, $index) use ($key) {
                 return $index <= $key;
@@ -88,13 +103,15 @@ class UketsukeHaraichoExportController
             $zaikoSu = data_get($row, 'zaiko_su') + $sumIn - $sumOut;
             $expRow['kisan_dt_from'] = data_get($options, 'kisan_dt_from');
             $expRow['kisan_dt_to'] = data_get($options, 'kisan_dt_to');
+            $expRow['kisan_dt'] = Carbon::parse(data_get($row, 'kisan_dt'))->format('Y/m/d');
+            $expRow['hidzuke_dt'] = Carbon::parse(data_get($row, 'hidzuke_dt'))->format('Y/m/d');
             $expRow['zaiko_case_su'] = floor($zaikoSu / data_get($row, 'irisu'));
             $expRow['zaiko_hasu'] = $zaikoSu % data_get($row, 'irisu');
             $expRow['zaiko_su'] = $zaikoSu;
             $expRow['zaiko_jyuryo'] = $zaikoSu * data_get($row, 'bara_tani_juryo');
             $expRow['nyusyuko_kbn'] = !empty($this->configNyusyukoKbn[$expRow['nyusyuko_kbn']]) ? $this->configNyusyukoKbn[$expRow['nyusyuko_kbn']] : '';
             return $expRow;
-        }, function ($rows) use ($fieldGroup, $mapping) {
+        }, function ($rows) use ($fieldGroup, $mapping, $options) {
             $rowGroup = [];
             foreach (array_keys($mapping) as $k) {
                 if (in_array($k, array_keys($fieldGroup))) {
@@ -103,22 +120,14 @@ class UketsukeHaraichoExportController
                     $rowGroup[$k] = "";
                 }
             }
-            $checkExistHeadMeisai = $rows->filter(function ($item) {
-                return $item->nyusyuko_den_no !== null;
-            });
             $rowGroup['todokesaki_nm'] = "【繰 越】";
-            if ($checkExistHeadMeisai->isEmpty()) {
-                $rowGroup['zaiko_case_su'] = 0;
-                $rowGroup['zaiko_hasu'] = 0;
-                $rowGroup['zaiko_su'] = 0;
-                $rowGroup['zaiko_jyuryo'] = 0;
-            } else {
-                $firstItem = $checkExistHeadMeisai->first();
-                $rowGroup['zaiko_case_su'] = data_get($firstItem, 'zaiko_case_su', 0);
-                $rowGroup['zaiko_hasu'] = data_get($firstItem, 'zaiko_hasu', 0);
-                $rowGroup['zaiko_su'] = data_get($firstItem, 'zaiko_su', 0);
-                $rowGroup['zaiko_jyuryo'] = data_get($firstItem, 'zaiko_jyuryo', 0);
-            }
+            $rowGroup['kisan_dt_from'] = data_get($options, 'kisan_dt_from');
+            $rowGroup['kisan_dt_to'] = data_get($options, 'kisan_dt_to');
+            $firstItem = $rows->first();
+            $rowGroup['zaiko_case_su'] = round(data_get($firstItem, 'zaiko_case_su', 0), 3);
+            $rowGroup['zaiko_hasu'] = round(data_get($firstItem, 'zaiko_hasu', 0) , 3);
+            $rowGroup['zaiko_su'] = round(data_get($firstItem, 'zaiko_su', 0), 3);
+            $rowGroup['zaiko_jyuryo'] = round(data_get($firstItem, 'zaiko_jyuryo', 0) ,3);
             return $rowGroup;
         });
 

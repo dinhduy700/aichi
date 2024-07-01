@@ -66,11 +66,8 @@ class ZaikoShoukaiListController
         $perPage = config('params.PAGE_SIZE');
         $listData = $this->zaikoShoukaiRepository->getListDataZaikoShoukai($request);
 
-        $data['total'] = $listData['total'];
-        $data['rows'] = $listData['rows']
-            ->offset(($page - 1) * $perPage)
-            ->limit($perPage)
-            ->get();
+        $data['rows'] = $listData->offset(($page - 1) * $perPage)->limit($perPage)->get();
+        $data['total'] = $data['rows']->count();
         return response()->json($data);
     }
 
@@ -140,6 +137,14 @@ class ZaikoShoukaiListController
             ->offset(($page - 1) * $perPage)
             ->limit($perPage)
             ->get();
+        $totalInSu = $data['rows']->sum('in_su');
+        $totalOutSu = $data['rows']->sum('out_su');
+        $totalRow = [
+            'nyusyuko_kbn' => '《合計》',
+            'in_su' => $totalInSu,
+            'out_su' => $totalOutSu,
+        ];
+        $data['rows']->prepend($totalRow);
         return response()->json($data);
     }
 

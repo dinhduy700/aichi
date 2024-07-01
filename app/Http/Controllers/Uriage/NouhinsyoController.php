@@ -38,6 +38,12 @@ class NouhinsyoController
 
     public function filterValidate(UriageNouhinsyoRequest $request)
     {
+        if(!$request->filled('exp.form1.render') && !$request->filled('exp.form2.render') && !$request->filled('exp.form3.render') && !$request->filled('exp.form4.render') ) {
+            return response()->json([
+                'sendForward' => 'no',
+                'message' => trans('messages.no_choice_type')
+            ]);
+        }
         return responseSendForward($this->uriageRepository->getNouhinsyoQb($request));
     }
 

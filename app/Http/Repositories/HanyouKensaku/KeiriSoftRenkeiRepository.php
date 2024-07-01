@@ -18,8 +18,8 @@ class KeiriSoftRenkeiRepository
             'm_ninusi.ninusi_ryaku_nm',
             DB::raw('null as field_no7'),
             'm_hachaku.atena',
-            DB::raw('COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tyukei_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0) as field_no9'),
-            DB::raw('COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tyukei_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0) + COALESCE(t_uriage.seikyu_kin_tax, 0) as field_no10'),
+            DB::raw(' SUM( COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tyukei_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0)) as field_no9'),
+            DB::raw(' SUM( COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tyukei_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0) + COALESCE(t_uriage.seikyu_kin_tax, 0)) as field_no10'),
             't_uriage.syaban',
             't_uriage.jyomuin_cd',
             'm_jyomuin.jyomuin_nm',
@@ -48,9 +48,26 @@ class KeiriSoftRenkeiRepository
             });
         }
 
+        $qb->orderBy('t_uriage.unso_dt');
+        $qb->orderBy('t_uriage.bumon_cd');
+        $qb->orderBy('t_uriage.ninusi_cd');
+        $qb->groupBy(
+            't_uriage.unso_dt',
+            't_uriage.bumon_cd',
+            'm_bumon.bumon_nm',
+            't_uriage.ninusi_cd',
+            'm_ninusi.ninusi_ryaku_nm',
+            'm_hachaku.atena',
+            't_uriage.syaban',
+            't_uriage.jyomuin_cd',
+            'm_jyomuin.jyomuin_nm',
+            't_uriage.tukoryo_kin'
+        );
+        $total = clone $qb;
+
         return [
             'rows' => $qb,
-            'total' => $qb->count(),
+            'total' => $total->get()->count(),
         ];
 
     }

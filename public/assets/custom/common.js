@@ -202,7 +202,15 @@ function fetchData(e, value, field, fieldShow, fieldChange, $row, setCallback) {
     if (fieldShow == '' && fieldChange == '') {
       return false;
     }
-    searchSuggestion(field, value).then(function (res) {
+
+    if ($(e).data('other_where')) {
+      var otherWhere =  $(e).data('other_where');
+      otherWhere = otherWhere.split(",");
+    } else {
+      var otherWhere = [];
+    }
+
+    searchSuggestion(field, value, '', otherWhere).then(function (res) {
       var html = '';
       if (res.data) {
         res.data.forEach(function (item) {
@@ -220,14 +228,23 @@ function fetchData(e, value, field, fieldShow, fieldChange, $row, setCallback) {
           } else if (typeof fieldChange === 'object' && Object.keys(fieldChange).length > 0) {
             html = html + '<li value="' + item[field] + '"';
             Object.keys(fieldChange).forEach(function (key) {
-              // console.log(key, fieldChange[key]);
               if (item[key] != null) {
-                var dataLi = item[key] ?? '';
-                html = html + ' data-' + fieldChange[key] + '=' + '"' + dataLi + '"';
+                if(Array.isArray(fieldChange[key])) {
+                  var changeList = fieldChange[key];
+                } else {
+                  var changeList = [fieldChange[key]];
+                }
+                for(let i = 0; i < changeList.length; i++) {
+                  var dataLi = item[key] ?? '';
+                  html = html + ' data-' + changeList[i] + '=' + '"' + dataLi + '"';
+                }
+                // var dataLi = item[key] ?? '';
+                // html = html + ' data-' + fieldChange[key] + '=' + '"' + dataLi + '"';
               }
 
             });
             html = html + '>';
+
           }
 
           if (fieldShow && Array.isArray(fieldShow)) {
@@ -247,6 +264,7 @@ function fetchData(e, value, field, fieldShow, fieldChange, $row, setCallback) {
         $e.parent().find('.suggestion').html(html);
 
         suggestionList = $row.find('.suggestion');
+        suggestionList.off('mousedown', 'li');
         suggestionList.on('mousedown', 'li', function (e) {
 
           e.stopPropagation();
@@ -266,11 +284,21 @@ function fetchData(e, value, field, fieldShow, fieldChange, $row, setCallback) {
           } else if (typeof fieldChange === 'object' && Object.keys(fieldChange).length > 0) {
             var __this = $(this);
             Object.keys(fieldChange).forEach(function (key) {
-              $row.find('input[name="' + fieldChange[key] + '"]').
-                val(__this.attr('data-' + fieldChange[key]));
+              // $row.find('input[name="' + fieldChange[key] + '"]').
+              //   val(__this.attr('data-' + fieldChange[key]));
+              var changeList = [];
+              if(Array.isArray(fieldChange[key])) {
+                  changeList = fieldChange[key];
+                } else {
+                  changeList = [fieldChange[key]];
+                }
+                for(let i = 0; i < changeList.length; i++) {
+                  $row.find('input[name="' + changeList[i] + '"]').
+                  val(__this.attr('data-' + changeList[i]));
+                }
             });
           }
-          $('.suggestion').hide();
+          $('.suggestion').html('');
 
         });
       }
@@ -575,6 +603,9 @@ function loading(onFlag = true) {
 }
 
 function formatDateGrid(value, row, index) {
+  if(value == -1) {
+    return '';
+  }
   return convertDateFormat(value);
 }
 function closePage() {
@@ -594,5 +625,39 @@ function closePage() {
     }
   } else {
     window.close();
+  }
+}
+
+function validateDates(dateFromElement, dateToElement, type) {
+  var dateFromInput = dateFromElement;
+  var dateToInput = dateToElement;
+
+  var dateFromValue = dateFromInput.val();
+  var dateToValue = dateToInput.val();
+  if(!type) {
+    type = 1;
+  }
+  if (dateFromValue && dateToValue) {
+    var dateFrom = new Date(dateFromValue);
+    var dateTo = new Date(dateToValue);
+    if (dateTo < dateFrom && type == 1) {
+      dateToInput.val(dateFromValue);
+    } else if(dateTo < dateFrom && type == 2) {
+      dateFromInput.val(dateToValue);
+    }
+  }
+}
+
+function applyClearAllInput(element_id) {
+  var $element = $(element_id);
+  if ($element.length) {
+    $element.find('input:not([type="checkbox"])').val('');
+    $element.find('select').val('');
+    $element.find('input[type="checkbox"]').each(function() {
+      $(this).prop('checked', false).trigger('change');
+    });
+    $element.find('.group-s-input').removeClass('active');
+  } else {
+    console.error(`Element with ID ${element_id} not found.`);
   }
 }

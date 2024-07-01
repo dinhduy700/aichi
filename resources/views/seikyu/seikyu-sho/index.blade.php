@@ -104,7 +104,7 @@
       columns: columns,
       pageNumber: pageNumber,
       formSearch: $('#seikyuSearchForm'),
-      pageSize: {{ config()->get('params.PAGE_SIZE') }},
+      pageSize: null,
       isShow: true,
     });
 
@@ -324,6 +324,15 @@
           }
         });
       }
+    }
+
+    function downloadPDF(e)
+    {
+      var form = $('#seikyuExport');
+      
+      var params = form.serializeArray();
+
+      createFormToDownload(e, params);
     }
   </script>
 @endsection

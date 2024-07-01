@@ -104,20 +104,20 @@
       <div class="form-group row">
         <!-- <label for="exampleInputUsername2" class="col-sm-2 col-form-label">発地</label> -->
         <div class="col-sm form-inline">
-          <div>
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hatuti_cd_from" style="" onkeyup="suggestionForm(this, 'hatuti_cd', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_from', hatuti_nm: 'hatuti_nm_from'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="hatuti_nm_from" style="" onkeyup="suggestionForm(this, 'hatuti_nm', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_from', hatuti_nm: 'hatuti_nm_from'}, $(this).parent() )" > --}}
+              <input type="text" class="form-control w70 input1" name="hatuti_cd_from" style="" onkeyup="suggestionForm(this, 'hatuti_cd', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: ['hatuti_cd_from', 'hatuti_cd_to'], hatuti_nm: ['hatuti_nm_from', 'hatuti_nm_to']}, $(this).parents('.form-group') )">
+              
+              <input class="form-control input2 w90" name="hatuti_nm_from" style="" onkeyup="suggestionForm(this, 'hatuti_nm', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: ['hatuti_cd_from', 'hatuti_cd_to'], hatuti_nm: ['hatuti_nm_from', 'hatuti_nm_to']}, $(this).parents('.form-group') )" > 
               <ul class="suggestion"></ul>
             </div>
           </div>
           <span class="px-2"> ～ </span>
-          <div>
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hatuti_cd_to"  onkeyup="suggestionForm(this, 'hatuti_cd', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_to', hatuti_nm: 'hatuti_nm_to'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="hatuti_nm_to"  onkeyup="suggestionForm(this, 'hatuti_nm', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_to', hatuti_nm: 'hatuti_nm_to'}, $(this).parent() )"> --}}
+              <input type="text" class="form-control w70 input1" name="hatuti_cd_to"  onkeyup="suggestionForm(this, 'hatuti_cd', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_to', hatuti_nm: 'hatuti_nm_to'}, $(this).parent() )">
+              
+              <input class="form-control input2 w90" name="hatuti_nm_to"  onkeyup="suggestionForm(this, 'hatuti_nm', ['hatuti_cd', 'hatuti_nm', 'kana'], {hatuti_cd: 'hatuti_cd_to', hatuti_nm: 'hatuti_nm_to'}, $(this).parent() )">
               <ul class="suggestion"></ul>
             </div>
           </div>
@@ -168,25 +168,24 @@
       <div class="form-group row">
         <!-- <label for="exampleInputUsername2" class="col-sm-2 col-form-label">荷主</label> -->
         <div class="col-sm form-inline">
-          <div>
-            <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="ninusi_cd_from" style="" onkeyup="suggestionForm(this, 'ninusi_cd', ['ninusi_cd', 'ninusi_ryaku_nm', 'kana'], {ninusi_cd: 'ninusi_cd_from', ninusi_ryaku_nm: 'ninusi_nm_from'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="ninusi_nm_from" style="" onkeyup="suggestionForm(this, 'ninusi_nm', ['ninusi_cd', 'ninusi_ryaku_nm', 'kana'], {ninusi_cd: 'ninusi_cd_from', ninusi_ryaku_nm: 'ninusi_nm_from'}, $(this).parent() )" > --}}
+          <div class="group-input">
+            <div class="group-flex flex-suggestion">
+              <input type="text" class="form-control w70 input1" name="ninusi_cd_from" onkeyup="suggestionForm(this, 'ninusi_cd', ['ninusi_cd', 'ninusi_ryaku_nm', 'kana'], {ninusi_cd: ['ninusi_cd_from', 'ninusi_cd_to'], ninusi_ryaku_nm: ['ninusi_nm_from', 'ninusi_nm_to']}, $(this).parents('.form-group') )">
+              
+              <input class="form-control input2 w90" name="ninusi_nm_from" style="" onkeyup="suggestionForm(this, 'ninusi_nm', ['ninusi_cd', 'ninusi_ryaku_nm', 'kana'], {ninusi_cd: ['ninusi_cd_from', 'ninusi_cd_to'], ninusi_ryaku_nm: ['ninusi_nm_from', 'ninusi_nm_to']}, $(this).parents('.form-group') )" >
               <ul class="suggestion"></ul>
             </div>
           </div>
           <span class="px-2"> ～ </span>
-          <div>
-            <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="ninusi_cd_to"  onkeyup="suggestionForm(this, 'ninusi_cd', ['ninusi_cd', 'ninusi_nm', 'kana'], {ninusi_cd: 'ninusi_cd_to', ninusi_nm: 'ninusi_nm_to'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="ninusi_nm_to"  onkeyup="suggestionForm(this, 'ninusi_nm', ['ninusi_cd', 'ninusi_nm', 'kana'], {ninusi_cd: 'ninusi_cd_to', ninusi_nm: 'ninusi_nm_to'}, $(this).parent() )"> --}}
+          <div class="group-input">
+            <div class="group-flex flex-suggestion">
+              <input type="text" class="form-control input1 w70" name="ninusi_cd_to"  onkeyup="suggestionForm(this, 'ninusi_cd', ['ninusi_cd', 'ninusi_nm', 'kana'], {ninusi_cd: 'ninusi_cd_to', ninusi_nm: 'ninusi_nm_to'}, $(this).parent() )">
+              
+              <input class="form-control input2 w90" name="ninusi_nm_to"  onkeyup="suggestionForm(this, 'ninusi_nm', ['ninusi_cd', 'ninusi_nm', 'kana'], {ninusi_cd: 'ninusi_cd_to', ninusi_nm: 'ninusi_nm_to'}, $(this).parent() )"> 
               <ul class="suggestion"></ul>
             </div>
           </div>
         </div>
-
       </div>
       <div class="error-message-row"></div>
     </div>
@@ -208,13 +207,13 @@
         <div class="col-sm form-inline">
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" style="width: 100%" name="syuka_dt_from" style="" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" style="width: 100%" name="syuka_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=syuka_dt_from]'), $('input[name=syuka_dt_to]'), 1)">
             </div>
           </div>
           <span class="px-2"> ～ </span>
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni"  style="width: 100%" name="syuka_dt_to" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni"  style="width: 100%" name="syuka_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=syuka_dt_from]'), $('input[name=syuka_dt_to]'), 2)">
             </div>
           </div>
         </div>
@@ -238,13 +237,13 @@
         <div class="col-sm form-inline">
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="haitatu_dt_from" style="" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="haitatu_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=haitatu_dt_from]'), $('input[name=haitatu_dt_to]'), 1)">
             </div>
           </div>
           <span class="px-2"> ～ </span>
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="haitatu_dt_to" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="haitatu_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=haitatu_dt_from]'), $('input[name=haitatu_dt_to]'), 2)">
             </div>
           </div>
         </div>
@@ -266,20 +265,20 @@
       <div class="form-group row">
         <!-- <label for="exampleInputUsername2" class="col-sm-2 col-form-label">着地</label> -->
         <div class="col-sm form-inline">
-          <div>
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hachaku_cd_from" style="" onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_from', hachaku_nm: 'hachaku_nm_from'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="hachaku_nm_from" style="" onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_from', hachaku_nm: 'hachaku_nm_from'}, $(this).parent() )" > --}}
+              <input type="text" class="form-control w70 input1" name="hachaku_cd_from" style="" onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: ['hachaku_cd_from', 'hachaku_cd_to'], hachaku_nm: ['hachaku_nm_from', 'hachaku_nm_to']}, $(this).parents('.form-group') )">
+              
+              <input class="form-control input2 w90" name="hachaku_nm_from" style="" onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: ['hachaku_cd_from', 'hachaku_cd_to'], hachaku_nm: ['hachaku_nm_from', 'hachaku_nm_to']}, $(this).parents('.form-group') )" > 
               <ul class="suggestion"></ul>
             </div>
           </div>
           <span class="px-2"> ～ </span>
-          <div>
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hachaku_cd_to"  onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_to', hachaku_nm: 'hachaku_nm_to'}, $(this).parent() )">
-              {{--
-              <input class="form-control input2" name="hachaku_nm_to"  onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_to', hachaku_nm: 'hachaku_nm_to'}, $(this).parent() )"> --}}
+              <input type="text" class="form-control w70 input1" name="hachaku_cd_to"  onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_to', hachaku_nm: 'hachaku_nm_to'}, $(this).parent() )">
+              
+              <input class="form-control input2 w90" name="hachaku_nm_to"  onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'hachaku_nm', 'kana'], {hachaku_cd: 'hachaku_cd_to', hachaku_nm: 'hachaku_nm_to'}, $(this).parent() )"> 
               <ul class="suggestion"></ul>
             </div>
           </div>
@@ -339,23 +338,18 @@
       <div class="form-group row">
         <!-- <label for="exampleInputUsername2" class="col-sm-2 col-form-label">品名</label> -->
         <div class="col-sm form-inline">
-          <div>
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hinmei_cd_from" style="" onkeyup="suggestionForm(this, 'hinmei_cd', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_from', hinmei_nm: 'hinmei_nm_from', hinmoku_nm: 'hinmoku_nm_from' }, $(this).parent() )">
-              {{--
-              <input type="text" class="form-control size-L" style="width: 100px; border-radius: 0" name="hinmoku_nm_from">
-
-              <input class="form-control input2" name="hinmei_nm_from" style="" onkeyup="suggestionForm(this, 'hinmei_nm', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_from', hinmei_nm: 'hinmei_nm_from', hinmoku_nm: 'hinmoku_nm_from'}, $(this).parent() )" > --}}
+              <input type="text" class="form-control w70 input1" name="hinmei_cd_from" style="" onkeyup="suggestionForm(this, 'hinmei_cd', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: ['hinmei_cd_from', 'hinmei_cd_to'], hinmei_nm: ['hinmei_nm_from', 'hinmei_nm_to'], hinmoku_nm: 'hinmoku_nm_from' }, $(this).parents('.form-group') )">
+              <input class="form-control input2 w90" name="hinmei_nm_from" style="" onkeyup="suggestionForm(this, 'hinmei_nm', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: ['hinmei_cd_from', 'hinmei_cd_to'], hinmei_nm: ['hinmei_nm_from', 'hinmei_nm_to'], hinmoku_nm: 'hinmoku_nm_from' }, $(this).parents('.form-group') )">
               <ul class="suggestion"></ul>
             </div>
           </div>
           <span class="px-2"> ～ </span>
-          <div >
+          <div class="group-input">
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni input1" name="hinmei_cd_to"  onkeyup="suggestionForm(this, 'hinmei_cd', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_to', hinmei_nm: 'hinmei_nm_to',  hinmoku_nm: 'hinmoku_nm_to'}, $(this).parent() )">
-              {{--
-              <input type="text" class="form-control size-L" style="width: 100px; border-radius: 0" name="hinmoku_nm_to">
-              <input class="form-control input2" name="hinmei_nm_to"  onkeyup="suggestionForm(this, 'hinmei_nm', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_to', hinmei_nm: 'hinmei_nm_to', hinmoku_nm: 'hinmoku_nm_to'}, $(this).parent() )"> --}}
+              <input type="text" class="form-control w70 input1" name="hinmei_cd_to"  onkeyup="suggestionForm(this, 'hinmei_cd', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_to', hinmei_nm: 'hinmei_nm_to',  hinmoku_nm: 'hinmoku_nm_to'}, $(this).parent() )">
+               <input class="form-control input2 w90" name="hinmei_nm_to" style="" onkeyup="suggestionForm(this, 'hinmei_nm', ['hinmei_cd', 'hinmei_nm', 'kana'], {hinmei_cd: 'hinmei_cd_to', hinmei_nm: 'hinmei_nm_to'}, $(this).parent() )" >
               <ul class="suggestion"></ul>
             </div>
           </div>
@@ -452,13 +446,13 @@
         <div class="col-sm form-inline">
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="unso_dt_from" style="" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="unso_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=unso_dt_from]'), $('input[name=unso_dt_to]'), 1)">
             </div>
           </div>
           <span class="px-2"> ～ </span>
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni"  name="unso_dt_to" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni"  name="unso_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=unso_dt_from]'), $('input[name=unso_dt_to]'), 2)">
             </div>
           </div>
         </div>
@@ -1053,13 +1047,13 @@
         <div class="col-sm form-inline">
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="denpyo_send_dt_from" style="" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="denpyo_send_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=denpyo_send_dt_from]'), $('input[name=denpyo_send_dt_to]'), 1)">
             </div>
           </div>
           <span class="px-2"> ～ </span>
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni"  name="denpyo_send_dt_to" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni"  name="denpyo_send_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=denpyo_send_dt_from]'), $('input[name=denpyo_send_dt_to]'), 2)">
             </div>
           </div>
         </div>
@@ -1083,13 +1077,13 @@
         <div class="col-sm form-inline">
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="nipou_dt_from" style="" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="nipou_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=nipou_dt_from]'), $('input[name=nipou_dt_to]'), 1)">
             </div>
           </div>
           <span class="px-2"> ～ </span>
           <div>
             <div class="group-flex">
-              <input type="text" class="form-control size-L-uni" name="nipou_dt_to" onchange="autoFillDate(this)">
+              <input type="text" class="form-control size-L-uni" name="nipou_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=nipou_dt_from]'), $('input[name=nipou_dt_to]'), 2)">
             </div>
           </div>
         </div>

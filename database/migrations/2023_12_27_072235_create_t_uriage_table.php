@@ -17,14 +17,17 @@ return new class extends Migration
             $table->integer('uriage_den_no')->primary()->comment('伝票NO');
             $table->integer('bumon_cd')->nullable()->comment('部門CD, 部門マスタと連携');
             $table->integer('hatuti_cd')->nullable()->comment('発地CD');
+            $table->string('hatuti_hachaku_nm')->nullable();
             $table->string('genkin_cd', 255)->nullable()->comment('現金CD, 1:現金、　それ以外は無し');
             $table->integer('ninusi_cd')->nullable()->comment('荷主CD');
             $table->date('syuka_dt')->nullable()->comment('集荷日, yyyy/mm/dd');
             $table->string('syuka_tm')->nullable()->comment('集荷指定時間(配達時刻）, MM:ss');
             $table->date('haitatu_dt')->nullable()->comment('配達日, yyyy/mm/dd');
             $table->integer('hachaku_cd')->nullable()->comment('発着地CD, 発地着地マスタと連携');
+            $table->string('hachaku_nm')->nullable();
             $table->string('syubetu_cd')->nullable()->comment('商品種別, 名称マスタの区分「syubetu」利用');
             $table->integer('hinmei_cd')->nullable()->comment('品名CD');
+            $table->string('hinmei_nm')->nullable();
             $table->decimal('menzei_kbn', 10, 0)->nullable()->comment('免税区分, 0:課税、1:免税');
             $table->decimal('seikyu_kin_tax', 10, 0)->nullable()->comment('消費税');
             $table->decimal('nieki_kin', 10, 0)->nullable()->comment('荷役料');
@@ -76,7 +79,8 @@ return new class extends Migration
             $table->integer('add_tanto_cd')->nullable()->comment('入力担当CD, 乗務員マスタと連携');
             $table->string('add_tanto_nm')->nullable()->comment('入力担当名, 乗務員マスタと連携');
             $table->string('haitatu_tel')->nullable()->comment('配達TEL');
-            $table->time('jikoku')->nullable()->comment('配達時刻, 00:00～23:59');
+            // $table->time('jikoku')->nullable()->comment('配達時刻, 00:00～23:59');
+            $table->string('jikoku')->nullable()->comment('配達時刻, 00:00～23:59');
             $table->string('haitatu_jyusyo1')->nullable()->comment('配達住所１');
             $table->string('haitatu_jyusyo2')->nullable()->comment('配達住所２');
             $table->string('haitatu_atena')->nullable()->comment('配達宛名');

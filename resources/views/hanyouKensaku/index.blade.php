@@ -95,41 +95,43 @@
         <div class="row mt-2">
           <div class="col-8">
             <div class="row">
-              <label class="col-2">検索条件</label>
-              <div class=" col-8" id="contentCondition">
-                <div class="row row-condition" id="firstCondition">
-                  <div class="col-4">
-                    <select class="form-control" name="field[1]" data-name="field" onchange="onchangeField(this)">
-                      @foreach(configParam('HANYOU_KENSAKU.field') as $key => $value)
-                      <option value="{{$key}}" > {{ $value }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="col-2">
-                    <select class="form-control" name="operator[1]" data-name="operator">
-                      @foreach(configParam('HANYOU_KENSAKU.operator') as $key => $value)
-                      <option value="{{$key}}" > {{ $value }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <input type="text" name="value[1]" data-name="value" class="form-control">
-                  </div>
-                  <div class="col-2">
-                    <select class="form-control" name="logical_operator[1]" data-name="logical_operator">
-                      @foreach(configParam('HANYOU_KENSAKU.logical_operator') as $key => $value)
-                      <option value="{{$key}}" > {{ $value }}</option>
-                      @endforeach
-                    </select>
+              <div class="col-10" id="contentCondition">
+                <div class="row mb-2" id="firstCondition">
+                  <label class="col-2">検索条件1</label>
+                  <div class=" col-10" >
+                    <div class="row row-condition" >
+                      <div class="col-2">
+                        <select class="form-control" name="logical_operator[0]" data-name="logical_operator" style="display: none;">
+                          @foreach(configParam('HANYOU_KENSAKU.logical_operator') as $key => $value)
+                          <option value="{{$key}}" > {{ $value }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="col-4">
+                        <select class="form-control" name="field[0]" data-name="field" onchange="onchangeField(this)">
+                          @foreach(configParam('HANYOU_KENSAKU.field') as $key => $value)
+                          <option value="{{$key}}" > {{ $value }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="col-2">
+                        <select class="form-control" name="operator[0]" data-name="operator">
+                          @foreach(configParam('HANYOU_KENSAKU.operator') as $key => $value)
+                          <option value="{{$key}}" > {{ $value }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <input type="text" name="value[0]" data-name="value" class="form-control">
+                      </div>
+                    </div>
                   </div>
                 </div>
-
               </div>
               <div class="col-2">
                 <button type="button" id="btnAddCondition" class="btn btn-primary" onclick="addCondition(this)">条件追加</button>
               </div>
             </div>
-
           </div>
           <div class="col-4 text-right">
             <button class="btn btn-clear min-wid-110" type="button" onclick="clearForm()">条件クリア</button>
@@ -160,7 +162,7 @@
     $('select[name="kinou"]').trigger('change');
   })
   function onchangeKinou(e) {
-    $('#contentCondition .row-condition:nth-child(n+2)').remove();
+    $('#contentCondition > div:nth-child(n+2)').remove();
     $('[name="value[0]"]').val('');
     var html = '<option></option>';
     var value = $(e).val();
@@ -180,8 +182,8 @@
         $('#btnAddCondition').click();
         $('select[name="field[0]"]').val('kaisyu_dt').trigger('change');
         $('select[name="operator[0]"]').val('>=');
-        $('select[name="operator[1]"]').val('<=');
         $('select[name="field[1]"]').val('kaisyu_dt').trigger('change');
+        $('select[name="operator[1]"]').val('<=');
         $('input[name="value[0]"]').val(nowServer);
         $('input[name="value[1]"]').val(nowServer);
         break;
@@ -189,8 +191,8 @@
         $('#btnAddCondition').click();
         $('select[name="field[0]"]').val('haitatu_dt').trigger('change');
         $('select[name="operator[0]"]').val('>=');
-        $('select[name="operator[1]"]').val('<=');
         $('select[name="field[1]"]').val('haitatu_dt').trigger('change');
+        $('select[name="operator[1]"]').val('<=');
         $('input[name="value[0]"]').val(nowServer);
         $('input[name="value[1]"]').val(nowServer);
         break;
@@ -291,15 +293,27 @@
   function addCondition(e) {
     var html = $('#firstCondition').clone();
     $('#contentCondition').append(html);
-    $('.row-condition:last-of-type input[data-name="value"]').val('');
+    $('[id="firstCondition"]:last-of-type input[data-name="value"]').val('');
     var now = 0;
-    $('#contentCondition > .row-condition').each(function() {
-      $(this).find('select, input').each(function(){
-        $(this).attr('name', $(this).attr('data-name')+'['+now+']');
+    $('#contentCondition .row-condition').each(function() {
 
+      $(this).find('select, input').each(function() {
+        $(this).attr('name', $(this).attr('data-name')+'['+now+']');
       });
+      if(now == 0) {
+        $('[name="logical_operator[0]"]').prop('disabled', true).css('display', 'none');
+      } else {
+        $('[name="logical_operator['+now+']"]').prop('disabled', false).css('display', 'block');
+      }
       now +=1;
+      $(this).parents('#firstCondition').find('label').html('検索条件' + now);
     });
+    var keyLogical = 0;
+    $('#contentCondition [data-name="logical_operator"]').each(function() {
+      $(this).attr('name', 'logical_operator['+(keyLogical - 1) +']');
+      keyLogical += 1;
+    });
+    
     if($('.row-condition').length >= 13) {
       $(e).css('display', 'none');
     }

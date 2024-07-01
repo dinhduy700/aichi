@@ -43,7 +43,7 @@ input {
     max-width: 100%;
 }
 .size-5L {
-    width: calc(50em + var(--padding-left) + var(--padding-right) + 2px) !important;
+    width: calc(50em + var(--padding-left) + var(--padding-right) + 2px)  !important;
     max-width: 100%;
 }
 .size-L-uni
@@ -56,6 +56,28 @@ input {
     width: calc(6em + var(--padding-left) + var(--padding-right) + 10px) !important;
     max-width: 100%;
 }
+
+.w50
+{
+    width: 50px !important;
+}
+.w60
+{
+    width: 60px !important;
+}
+.w70
+{
+    width: 70px !important;
+}
+.w80
+{
+    width: 80px !important;
+}
+.w90
+{
+    width: 90px !important;
+}
+
 select.size-S {
     width: calc(2em + var(--padding-left) + var(--padding-right) + 20px) !important;
 }
@@ -92,6 +114,35 @@ select.size-S {
     width: calc(30em + var(--padding-left) + var(--padding-right) + 4px) !important;
     min-width: calc(30em + var(--padding-left) + var(--padding-right) + 4px) !important;
 }
+.hansontable .r-size-S
+{
+    width: calc(2em + var(--padding-left) + var(--padding-right) + 4px);
+    min-width: calc(2em + var(--padding-left) + var(--padding-right) + 4px);
+}
+
+.hansontable .r-size-M
+{
+    width: calc(5em + var(--padding-left) + var(--padding-right) + 4px);
+    min-width: calc(5em + var(--padding-left) + var(--padding-right) + 4px);
+}
+
+.hansontable .r-size-L
+{
+    width: calc(10em + var(--padding-left) + var(--padding-right) + 4px);
+    min-width: calc(10em + var(--padding-left) + var(--padding-right) + 4px);
+}
+
+.hansontable .r-size-2L
+{
+    width: calc(20em + var(--padding-left) + var(--padding-right) + 4px);
+    min-width: calc(20em + var(--padding-left) + var(--padding-right) + 4px);
+}
+
+.hansontable .r-size-3L
+{
+    width: calc(30em + var(--padding-left) + var(--padding-right) + 4px );
+    min-width: calc(30em + var(--padding-left) + var(--padding-right) + 4px);
+}
 .hansontable tfoot button
 {
     background: #eee;
@@ -108,6 +159,9 @@ select.size-S {
 .hansontable.editable td
 {
     padding: 2px;
+}
+.hansontable th .th-inner {
+    width: 100%;
 }
 .hansontable.editable td input[type="text"]
 {
@@ -510,6 +564,7 @@ li.nav-item a {
 .hansontable.editable tbody td, .hansontable.editable tfoot td
 {
     padding: 1px !important;
+    overflow: unset !important;
 }
 
 .hansontable:not(.editable) tr:nth-child(even) {
@@ -664,47 +719,58 @@ select.form-control, select.asColorPicker-input, .dataTables_wrapper select, .js
 .th-37 .th-inner
 {
     width: 37px;
+    min-width: 37px;
 }
 .th-45 .th-inner
 {
     width: 45px;
+    min-width: 45px;
 }
 .th-50 .th-inner
 {
     width: 50px;
+    min-width: 50px;
 }
 
 .th-60 .th-inner
 {
     width: 60px;
+    min-width: 60px;
 }
 .th-70 .th-inner
 {
     width: 70px;
+    min-width: 70px;
 }
 .th-80 .th-inner
 {
     width: 80px;
+    min-width: 80px;
 }
 .th-90 .th-inner
 {
     width: 90px;
+    min-width: 90px;
 }
 .th-100 .th-inner
 {
     width: 100px;
+    min-width: 100px;
 }
 .th-110 .th-inner
 {
     width: 110px;
+    min-width: 110px;
 }
 .th-120 .th-inner
 {
     width: 120px;
+    min-width: 120px;
 }
 .th-130 .th-inner
 {
     width: 130px;
+    min-width: 130px;
 }
 .th-135 .th-inner
 {

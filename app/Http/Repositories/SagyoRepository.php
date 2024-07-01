@@ -125,20 +125,16 @@ class SagyoRepository
         $qb = $tUriage->filter($request);// $qb = new Builder();
         $qb->select("{$table}.*");
         $qb->addSelect([
-            'syuka_tm',
-            'jikoku',
-            DB::raw("CASE WHEN syuka_tm IS NOT NULL THEN CONCAT(syuka_tm, '指') ELSE '' END as syuka_tm_formatted"),
-            DB::raw("CASE WHEN jikoku IS NOT NULL THEN CONCAT(jikoku, '指') ELSE '' END as jikoku_formatted"),
+            DB::raw("{$table}.hatuti_hachaku_nm as hatuti_nm"),
+            DB::raw("CASE WHEN {$table}.syuka_tm IS NOT NULL THEN CONCAT({$table}.syuka_tm, '指') ELSE '' END as syuka_tm_formatted"),
+            DB::raw("CASE WHEN {$table}.jikoku IS NOT NULL THEN CONCAT({$table}.jikoku, '指') ELSE '' END as jikoku_formatted"),
             DB::raw("CONCAT(m_meisyo_rikuun.meisyo_nm, ' ', car_number_syubetu, car_number_kana, car_number) as card_nm"),
         ]);
         // 部門マスタ
         $qb->joinMBumon()->addSelect("bumon_nm");
         // 荷主マスタ
         $qb->joinMNinusi()->addSelect(["m_ninusi.ninusi_ryaku_nm", DB::raw("CONCAT(m_ninusi.ninusi_cd, ' ', m_ninusi.ninusi_ryaku_nm) as ninusi_cd_ryaku_nm")]);
-        // 発地着地マスタ
-        $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
-        $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
-        $qb->joinMHinmei()->addSelect("hinmei_nm");
+        
         // 名称マスタ
         $qb->joinMMeisyoJyutyu()->addSelect("m_meisyo_jyutyu.meisyo_nm AS jyutyu_kbn_nm");
         $qb->joinMMeisyoTani()->addSelect("m_meisyo_tani.meisyo_nm AS tani_nm");

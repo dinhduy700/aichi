@@ -210,7 +210,8 @@ class NyusyukoInputsRequest extends FormRequest
         });
 
         $validator->addExtension('hinmei_exists', function($attribute, $value, $parameters, $validator) {
-            $exists = DB::table('m_soko_hinmei')->where('hinmei_cd', $value)->exists();
+            $ninusiCd = request()->input('nyusyuko_head.ninusi_cd');
+            $exists = DB::table('m_soko_hinmei')->where('hinmei_cd', $value)->where('ninusi_cd', $ninusiCd)->exists();
             return $exists;
         });
 

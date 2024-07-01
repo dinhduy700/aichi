@@ -12,7 +12,7 @@ class RyoshushoRepository
 {
     public function getListWithTotalCount($request)
     {
-        $qb = TUriage::query()->select('t_uriage.*')
+        $qb = TUriage::query()->select('t_uriage.*', DB::raw('t_uriage.hatuti_hachaku_nm as hatuti_nm'))
             ->where('genkin_cd', 1)
             ->whereNotNull('syaban');
 
@@ -28,17 +28,17 @@ class RyoshushoRepository
             ->addSelect('m_seikyu.zei_keisan_kbn');
 
         $qb->joinHatuti()->addSelect([
-            'm_hatuti.hachaku_nm AS hatuti_nm',//GRID.発地
+            // 'm_hatuti.hachaku_nm AS hatuti_nm',//GRID.発地
             'm_hatuti.jyusyo1_nm AS hatuti_jyusyo1_nm',//GRID.発地住所１
             'm_hatuti.jyusyo2_nm AS hatuti_jyusyo2_nm',//GRID.発地住所２
         ]);
         $qb->joinMHachaku()->addSelect([
-            'm_hachaku.hachaku_nm',//GRID.着地
+            // 'm_hachaku.hachaku_nm',//GRID.着地
             'm_hachaku.jyusyo1_nm AS hachaku_jyusyo1_nm',//GRID.着地住所１
             'm_hachaku.jyusyo2_nm AS hachaku_jyusyo2_nm',//GRID.着地住所２
         ]);
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['m_hinmei.hinmei_nm', 'm_hinmoku.hinmoku_nm']);//品名, メーカー
-
+        // $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['m_hinmei.hinmei_nm', 'm_hinmoku.hinmoku_nm']);//品名, メーカー
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['m_hinmoku.hinmoku_nm']);
         $qb->joinMMeisyoSyubetu()->addSelect('m_meisyo_syubetu.meisyo_nm AS syubetu_nm');
 
         //金額

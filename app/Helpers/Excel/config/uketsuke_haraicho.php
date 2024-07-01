@@ -7,9 +7,30 @@ return [
             'page' => [
                 'start' => ['col' => 'A', 'row' => 1],
                 'end' => ['col' => 'BY', 'row' => 65],
-                'size' => 23
+                'size' => 21
             ],
             'height' => 65
+        ],
+        'forward' => [
+            'total' => [
+                ['col' => 'BK', 'row' => 1, 'value' => function ($list) {
+                    $first = !empty($list) ? $list->first() : null;
+                    return !empty($first) ? floor(($first->zaiko_su - $first->in_su + $first->out_su) / $first->irisu) : 0;
+                }, 'type' => $exp::DATA_CLOSURE, 'mergeCells' => ['w' => 3, 'h' => 2]],
+                ['col' => 'BN', 'row' => 1, 'value' => function ($list) {
+                    $first = !empty($list) ? $list->first() : null;
+                    return !empty($first) ? ($first->zaiko_su - $first->in_su + $first->out_su) % $first->irisu : 0;
+                }, 'type' => $exp::DATA_CLOSURE, 'mergeCells' => ['w' => 2, 'h' => 2]],
+                ['col' => 'BP', 'row' => 1, 'value' => function ($list) {
+                    $first = !empty($list) ? $list->first() : null;
+                    return !empty($first) ? $first->zaiko_su - $first->in_su + $first->out_su : 0;
+                }, 'type' => $exp::DATA_CLOSURE, 'mergeCells' => ['w' => 4, 'h' => 2]],
+                ['col' => 'BT', 'row' => 1, 'value' => function ($list) {
+                    $first = !empty($list) ? $list->first() : null;
+                    return !empty($first) ? ($first->zaiko_su - $first->in_su + $first->out_su) * $first->bara_tani_juryo : 0;
+                }, 'type' => $exp::DATA_CLOSURE, 'mergeCells' => ['w' => 5, 'h' => 2]],
+                ['col' => 'W', 'row' => 1,'mergeCells' => ['w' => 12, 'h' => 2, 'style' => 'center'], 'value' => '【　繰　越　】']
+            ],
         ],
         'summary' => [
             'total' => [
@@ -38,14 +59,14 @@ return [
         ],
         'header' => [
             'start' => ['col' => 'A', 'row' => 1],
-            'end' => ['col' => 'BX', 'row' => 17],
+            'end' => ['col' => 'BX', 'row' => 15],
             'mergeCells' => [
                 ['col' => 'AH', 'row' => 1, 'w' => 14, 'h' => 3],
-                ['col' => 'BO', 'row' => 5, 'w' => 6, 'h' => 1],
+                ['col' => 'BM', 'row' => 5, 'w' => 8, 'h' => 1],
                 ['col' => 'BU', 'row' => 5, 'w' => 3, 'h' => 1],
                 ['col' => 'C', 'row' => 7, 'w' => 4, 'h' => 1],
                 ['col' => 'L', 'row' => 8, 'w' => 13, 'h' => 1],
-                ['col' => 'C', 'row' => 9, 'w' => 4, 'h' => 1],
+                ['col' => 'B', 'row' => 9, 'w' => 5, 'h' => 1],
                 ['col' => 'B', 'row' => 11, 'w' => 2, 'h' => 1],
                 ['col' => 'I', 'row' => 11, 'w' => 6, 'h' => 1],
                 ['col' => 'B', 'row' => 12, 'w' => 3, 'h' => 2],
@@ -55,7 +76,6 @@ return [
                 ['col' => 'O', 'row' => 12, 'w' => 3, 'h' => 2],
                 ['col' => 'R', 'row' => 12, 'w' => 5, 'h' => 2],
                 ['col' => 'W', 'row' => 12, 'w' => 12, 'h' => 2],
-                ['col' => 'W', 'row' => 16, 'w' => 12, 'h' => 2],
                 ['col' => 'AI', 'row' => 12, 'w' => 14, 'h' => 2],
                 ['col' => 'AI', 'row' => 14, 'w' => 3, 'h' => 2],
                 ['col' => 'AL', 'row' => 14, 'w' => 2, 'h' => 2],
@@ -70,14 +90,10 @@ return [
                 ['col' => 'BK', 'row' => 14, 'w' => 3, 'h' => 2],
                 ['col' => 'BN', 'row' => 14, 'w' => 2, 'h' => 2],
                 ['col' => 'BP', 'row' => 14, 'w' => 4, 'h' => 2],
-                ['col' => 'BT', 'row' => 14, 'w' => 5, 'h' => 2],
-                ['col' => 'BK', 'row' => 16, 'w' => 3, 'h' => 2],
-                ['col' => 'BN', 'row' => 16, 'w' => 2, 'h' => 2],
-                ['col' => 'BP', 'row' => 16, 'w' => 4, 'h' => 2],
-                ['col' => 'BT', 'row' => 16, 'w' => 5, 'h' => 2],
+                ['col' => 'BT', 'row' => 14, 'w' => 5, 'h' => 2]
             ],
             'others' => [
-                ['col' => 'BO', 'row' => 5, 'constVal' => $exp::VAL_CURRENT_TIME],
+                ['col' => 'BM', 'row' => 5, 'constVal' => $exp::VAL_CURRENT_TIME],
                 ['col' => 'BU', 'row' => 5, 'constVal' => $exp::VAL_PAGE_NO],
                 ['col' => 'C', 'row' => 7, 'value' => function($list) {
                     $first = !empty($list) ? $list->first() : null;
@@ -105,7 +121,7 @@ return [
                         return " ";
                     }
                 }],
-                ['col' => 'C', 'row' => 9, 'value' => function($list) {
+                ['col' => 'B', 'row' => 9, 'value' => function($list) {
                     $first = !empty($list) ? $list->first() : null;
                     return !empty($first) ? $first->ninusi_cd : ' ';
                 }],
@@ -120,22 +136,6 @@ return [
                 ['col' => 'I', 'row' => 11, 'value' => function($list) {
                     $first = !empty($list) ? $list->first() : null;
                     return !empty($first) ? $first->hinmei_nm : ' ';
-                }],
-                ['col' => 'BK', 'row' => 16, 'value' => function($list) {
-                    $first = !empty($list) ? $list->first() : null;
-                    return !empty($first) ? $first->zaiko_case_su  : 0;
-                }],
-                ['col' => 'BN', 'row' => 16, 'value' => function($list) {
-                    $first = !empty($list) ? $list->first() : null;
-                    return !empty($first) ? $first->zaiko_hasu : 0;
-                }],
-                ['col' => 'BP', 'row' => 16, 'value' => function($list) {
-                    $first = !empty($list) ? $list->first() : null;
-                    return !empty($first) ? $first->zaiko_su : 0;
-                }],
-                ['col' => 'BT', 'row' => 16, 'value' => function($list) {
-                    $first = !empty($list) ? $list->first() : null;
-                    return !empty($first) ? $first->zaiko_jyuryo : 0;
                 }],
                 ['col' => 'W', 'row' => 11, 'value' => function($list) {
                     $first = !empty($list) ? $list->first() : null;

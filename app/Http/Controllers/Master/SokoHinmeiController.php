@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
 
 use App\Http\Repositories\SokoHinmeiRepository;
-use App\Helpers\XlsExportMst;
+use App\Helpers\Excel\Master\XlsSokoHinmeiList;
 use App\Http\Requests\SokoHinmeiRequest;
 
 class SokoHinmeiController extends Controller
@@ -119,12 +119,18 @@ class SokoHinmeiController extends Controller
      */
     public function exportExcelDataTable(Request $request)
     {
-        $exporter = new XlsExportMst();
-        $page = $request->page ?? 1;
-        $perPage = config('params.PAGE_SIZE');
+        $exporter = new XlsSokoHinmeiList();
         $listData = $this->sokoHinmeiRepository->getListWithTotalCount($request);
         $data = $listData['rows']->get();
-        
+
+        foreach ($data as $i => $item) {
+            $item->ondo         = $item->ondo != null &&  $item->ondo != '' ? data_get(configParam('options.m_soko_hinmei.ondo', [], 1), $item->ondo) : null;
+            $item->zaiko_kbn    = $item->zaiko_kbn != null &&  $item->zaiko_kbn != '' ? data_get(configParam('options.m_soko_hinmei.zaiko_kbn', [], 1), $item->zaiko_kbn) : null;
+            $item->keisan_kb    = $item->keisan_kb != null &&  $item->keisan_kb != '' ? data_get(configParam('options.m_soko_hinmei.keisan_kb', [], 1), $item->keisan_kb) : null;
+            $item->seikyu_keta  = $item->seikyu_keta != null &&  $item->seikyu_keta != '' ? data_get(configParam('options.m_soko_hinmei.seikyu_keta', [], 1), $item->seikyu_keta) : null;
+            $item->kyumin_flg   = $item->kyumin_flg != null &&  $item->kyumin_flg != '' ? data_get(configParam('options.m_soko_hinmei.kyumin_flg', [], 1), $item->kyumin_flg) : null;
+        }
+       
         $config = require(app_path('Helpers/Excel/config/m_soko_hinmei.php'));
 
         // Specify the directory path
@@ -138,6 +144,8 @@ class SokoHinmeiController extends Controller
         $templatePath = app_path('Helpers/Excel/template/m_soko_hinmei.xlsx');
         $savePath = $directoryPath . '/m_soko_hinmei.xlsx';
         $exporter->export($templatePath, $config, $data, $savePath);
-        return Response::download($savePath)->deleteFileAfterSend(true);
+
+        return response()->download($savePath, '倉庫商品マスタリスト_'.  date('YmdHis') . '.xlsx')
+            ->deleteFileAfterSend(true);
     }
 }

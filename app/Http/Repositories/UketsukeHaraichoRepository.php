@@ -143,7 +143,7 @@ class UketsukeHaraichoRepository
             't1.location',
             't1.todokesaki_nm',
             DB::raw("COALESCE(t1.in_jyuryo,0) as in_jyuryo"),
-            DB::raw("COALESCE(t1.out_jyuryo,0) as out_jyuryo"),
+            DB::raw("COALESCE(CASE WHEN t1.out_jyuryo < 0 THEN t1.out_jyuryo * (-1) ELSE t1.out_jyuryo END, 0) as out_jyuryo"),
             'nyusyuko_den_no',
             DB::raw('CASE WHEN m_soko_hinmei.irisu IS NULL OR m_soko_hinmei.irisu = 0 THEN 1 ELSE m_soko_hinmei.irisu END'),
             DB::raw("NULL AS no_printing1")
@@ -213,6 +213,8 @@ class UketsukeHaraichoRepository
         $qb->orderBy('t_zaiko.ninusi_cd');
         $qb->orderBy('t_zaiko.hinmei_cd');
         $qb->orderBy('t1.kisan_dt');
+        $qb->orderBy('t1.soko_cd');
+        $qb->orderBy('t1.location');
 
         $qbSubByKisanDt = $this->getSuByKisanDt($request, $isGroupLot);
         $qb->leftJoinSub($qbSubByKisanDt, 'dt', function ($join) use ($isGroupLot) {
@@ -252,7 +254,6 @@ class UketsukeHaraichoRepository
             . " ELSE 0"
             . " END AS zaiko_hasu");
         $qb->selectRaw("(dt.zaiko_su * COALESCE(m_soko_hinmei.bara_tani_juryo, 0)) AS zaiko_jyuryo");
-
         return $qb;
     }
 
@@ -278,14 +279,17 @@ class UketsukeHaraichoRepository
         $qb = DB::query()->newQuery()
             ->select(array_merge($groupBy, [
                 // 1:入庫
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '1' THEN t_nyusyuko_meisai.case_su ELSE 0 END) AS in_case_su"),
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '1' THEN t_nyusyuko_meisai.hasu ELSE 0 END) AS in_hasu_su"),
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '1' THEN t_nyusyuko_meisai.jyuryo ELSE 0 END) AS in_jyuryo"),
+                DB::raw("SUM(CASE 
+                    WHEN t_nyusyuko_head.nyusyuko_kbn = '1' 
+                    OR t_nyusyuko_head.nyusyuko_kbn = '4' 
+                    OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su > 0)
+                    THEN t_nyusyuko_meisai.jyuryo ELSE 0 END) AS in_jyuryo"),
                 DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '1' THEN t_nyusyuko_meisai.su ELSE 0 END) AS in_su"),
                 // 2:出庫
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '2' THEN t_nyusyuko_meisai.case_su ELSE 0 END) AS out_case_su"),
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '2' THEN t_nyusyuko_meisai.hasu ELSE 0 END) AS out_hasu_su"),
-                DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '2' THEN t_nyusyuko_meisai.jyuryo ELSE 0 END) AS out_jyuryo"),
+                DB::raw("SUM(CASE 
+                    WHEN t_nyusyuko_head.nyusyuko_kbn = '2' 
+                    OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su < 0) 
+                    THEN t_nyusyuko_meisai.jyuryo ELSE 0 END) AS out_jyuryo"),
                 DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '2' THEN t_nyusyuko_meisai.su ELSE 0 END) AS out_su"),
                 // 4
                 DB::raw("SUM(CASE WHEN t_nyusyuko_head.nyusyuko_kbn = '4' THEN t_nyusyuko_meisai.su ELSE 0 END) AS exist_su"),

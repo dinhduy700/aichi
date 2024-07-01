@@ -43,12 +43,14 @@ class XlsExportMst
     const VAL_CURRENT_TIME = 'current_time';
     const VAL_PAGE_NO = 'page_no';
     const VAL_PAGE_NO_OVER_TOTAL_PAGE = 'page_no_over_total_page';
+    const VAL_PAGE_NO_OVER_TOTAL_PAGE_ON_TOTAL_GROUP = 'page_no_over_total_page_on_total_group';
 
     const DATA_DATETIME = 'datetime';
     const DATA_STRING = 'string';
     const DATA_CLOSURE = 'closure';
 
     protected $pageNo = 0;
+    protected $totalGroup = 1;
     protected $pageNoCells = [];
     public $pageNoFormat = "%d頁";//sprintf
     public $pageNoOverTotalFormat = "%d/%d頁";//sprintf
@@ -117,6 +119,9 @@ class XlsExportMst
                 return sprintf($this->pageNoFormat, $this->pageNo);
             case self::VAL_PAGE_NO_OVER_TOTAL_PAGE:
                 $this->pageNoCells[$cell] = $this->pageNo;
+            case self::VAL_PAGE_NO_OVER_TOTAL_PAGE_ON_TOTAL_GROUP:
+                return sprintf($this->pageNoOverTotalFormat, $this->pageNo, $this->totalGroup);
+            default:
                 return '';
         }
         return '';

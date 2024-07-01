@@ -17,9 +17,8 @@ class CheckGroup
     public function handle(Request $request, Closure $next, $group): Response
     {
 
-        // if (Auth::check() && Auth::user()->hasGroup($group)) {
-            // return $next($request);
-        // }
-        return $next($request);
+        if (Auth::check() && Auth::user()->hasGroup($group)) {
+            return $next($request);
+        }
     }
 }

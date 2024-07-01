@@ -14,7 +14,7 @@ return [
         'field' => 'nyusyuko_den_meisai_no',
         'title' => 'SEQ',
         'editable' => false,
-        'copytable' => false,
+        'copitable' => false,
         'formatterFooter' => true
     ],
     [
@@ -37,7 +37,7 @@ return [
             'tani_cd',
             'tani_nm'
         ],
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => false,
         'copitable' => true,
         'url_suggestion' => route('nyusyuko.nyuryoku.suggestion_multiple'),
@@ -66,7 +66,7 @@ return [
             'tani_cd',
             'tani_nm'
         ],
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => false,
         'copitable' => true,
         'url_suggestion' => route('nyusyuko.nyuryoku.suggestion_multiple'),
@@ -79,7 +79,7 @@ return [
         'field' => 'kikaku',
         'title' => '商品規格',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'formatter' => 'formatKikaku',
         'formatterFooter' => true
@@ -88,27 +88,27 @@ return [
         'field' => 'lot1',
         'title' => 'ロット１',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
     ],
     [
         'field' => 'lot2',
         'title' => 'ロット２',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
     ],
     [
         'field' => 'lot3',
         'title' => 'ロット３',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
     ],
     [
         'field' => 'irisu',
         'title' => '入り数',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'type' => 'number',
         'editable' => true,
         'copitable' => true,
@@ -118,7 +118,7 @@ return [
     [
         'field' => 'case_su',
         'title' => 'ケース数',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'type' => 'number',
         'editable' => true,
         'copitable' => true,
@@ -128,7 +128,7 @@ return [
     [
         'field' => 'hasu',
         'title' => '端数',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'type' => 'number',
         'editable' => true,
         'copitable' => true,
@@ -138,7 +138,7 @@ return [
     [
         'field' => 'su',
         'title' => '総数',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'type' => 'number',
         'editable' => true,
         'copitable' => true,
@@ -160,7 +160,7 @@ return [
     [
         'field' => 'tani_nm',
         'title' => '単位名',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
         'suggestion' => true,
@@ -173,16 +173,17 @@ return [
     [
         'field' => 'jyuryo',
         'title' => '重量／㎥',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'type' => 'number',
+        'copitable' => true,
         'formatter' => 'formatterjJyuryo',
         'formatterFooter' => true
     ],
     [
         'field' => 'soko_cd',
         'title' => '倉庫CD',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
         'suggestion' => true,
@@ -199,7 +200,7 @@ return [
     [
         'field' => 'soko_nm',
         'title' => '倉庫名',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
         'suggestion' => true,
@@ -216,16 +217,17 @@ return [
     [
         'field' => 'location',
         'title' => 'ロケーション',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
     ],
     [
         'field' => 'biko',
         'title' => '備考',
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'editable' => true,
         'copitable' => true,
+        'formatterFooter' => true 
     ]
 ];
 ?>

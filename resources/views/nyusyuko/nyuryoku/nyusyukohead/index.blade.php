@@ -336,6 +336,13 @@
 
     window.addEventListener('message', function(event) {
       var receivedObject = event.data;
+      if( typeof receivedObject == 'object') {
+        if(receivedObject.data_nyusyuko_kbn) {
+          $('[name="hed_nyusyuko_kbn"]').val(receivedObject.data_nyusyuko_kbn);
+        } else {
+          $('[name="hed_nyusyuko_kbn"]').val('');
+        }
+      }
       if(event.data == 'research') {
         searchList();
       }

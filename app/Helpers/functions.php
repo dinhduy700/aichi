@@ -89,7 +89,7 @@ if (!function_exists('cnvXlsToPdf')) {
                 $sharedPath = env('XLS_TO_PDF_SHARE_DIR') . DIRECTORY_SEPARATOR;
                 $shareXlsPath = $sharedPath . $xlsFileNm;
                 \Illuminate\Support\Facades\File::copy($xlsPath, $shareXlsPath);
-                $response = \Illuminate\Support\Facades\Http::get(env('XLS_TO_PDF_API'), [
+                $response = \Illuminate\Support\Facades\Http::timeout(600)->get(env('XLS_TO_PDF_API'), [
                     'file' => $xlsFileNm,
                 ]);
                 if ($response->failed()) {

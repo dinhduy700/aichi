@@ -40,14 +40,12 @@ class ZaikoShoukaiRepository
 
     public function getListDataZaikoShoukai($request)
     {
-        $qb = $this->qbBySearchZaikoShoukai($request);
-
-        $qb->select(
-            DB::raw('ROW_NUMBER() OVER () as index'),
-            't_zaiko.bumon_cd',
-            't_zaiko.ninusi_cd',
-            't_zaiko.hinmei_cd',
-            't_zaiko.soko_cd',
+        $isGroupLot = true;
+        if (!in_array(self::SHOW_LIST_LOT, data_get($request, 'option', []))) {
+            $isGroupLot = false;
+        }
+        $qb = $this->qbBySearchZaikoShoukai($request, $isGroupLot);
+        $qb->addSelect(
             'm_soko_hinmei.hinmei_nm',
             'm_soko_hinmei.kikaku',
             DB::raw("CASE WHEN m_soko_hinmei.irisu IS NULL OR m_soko_hinmei.irisu = 0 THEN 1 ELSE m_soko_hinmei.irisu END AS irisu"),
@@ -62,86 +60,100 @@ class ZaikoShoukaiRepository
             $join->on('bara_tani_meisyo.meisyo_cd', 'm_soko_hinmei.bara_tani');
             $join->where('bara_tani_meisyo.meisyo_kbn', configParam('MEISYO_KBN_TANI'));
         })->addSelect('bara_tani_meisyo.meisyo_nm as bara_tani_meisyo_nm');
-        $groupBy = [
-            "t_zaiko.bumon_cd",
-            "t_zaiko.ninusi_cd",
-            "t_zaiko.hinmei_cd",
-            "t_zaiko.soko_cd",
-            "m_soko_hinmei.hinmei_nm",
-            "m_soko_hinmei.kikaku",
-            "irisu",
-            "m_soko_hinmei.bara_tani_juryo",
-            "case_meisyo.meisyo_nm",
-            "bara_tani_meisyo.meisyo_nm"
-        ];
-        if ($request->filled('option')) {
-            $options = array_values($request['option']);
-            if (in_array($this::SHOW_LIST_LOT, $options)) {
-                $qb->addSelect(
-                    't_zaiko.lot1',
-                    't_zaiko.lot2',
-                    't_zaiko.lot3'
-                );
-                $qb->selectRaw("t_zaiko.su - 
-                    {$this->sumStringQuery('1', true)} + 
-                    {$this->sumStringQuery('2', true)} 
-                    as zaiko_su", [$request->search_kisan_dt, $request->search_kisan_dt]
-                );
-            } else {
-                $qb->selectRaw("SUM(t_zaiko.su - 
-                    {$this->sumStringQuery('1', true)} + 
-                    {$this->sumStringQuery('2', true)}
-                    ) as zaiko_su ", [$request->search_kisan_dt, $request->search_kisan_dt]
-                );
-                $qb->groupBy($groupBy);
-            }
-
-            if (!in_array($this::SHOW_OUT_OF_STOCK, $options)) {
-                $qb->where("t_zaiko.su", ">", 0);
-            }
-        } else {
-            $qb->where("t_zaiko.su", ">", 0);
-            $qb->selectRaw("SUM(t_zaiko.su - 
-                    {$this->sumStringQuery('1', true)} + 
-                    {$this->sumStringQuery('2', true)}
-                    ) as zaiko_su ", [$request->search_kisan_dt, $request->search_kisan_dt]
+        if ($isGroupLot) {
+            $qb->selectRaw("
+                t_zaiko.su - 
+                {$this->sumStringQuery('1', true)} + 
+                {$this->sumStringQuery('2', true)} -
+                {$this->sumStringQuery('4', true)} -
+                {$this->sumStringQuery('5', true)} 
+                as zaiko_su", [
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt
+                ]
             );
-            $qb->groupBy($groupBy);
+        } else {
+            $qb->selectRaw("
+                t_zaiko.su - 
+                {$this->sumStringQuery('1')} + 
+                {$this->sumStringQuery('2')} - 
+                {$this->sumStringQuery('4')} -
+                {$this->sumStringQuery('5')} 
+                as zaiko_su", [
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt,
+                    $request->search_kisan_dt
+                ]
+            );
         }
-        $list = $qb;
-        $total = $list->count();
+        $groupNoneSoko = array_merge([
+            "tz.bumon_cd",
+            "tz.ninusi_cd",
+            "tz.hinmei_cd",
+            "tz.hinmei_nm",
+            "tz.kikaku",
+            "tz.irisu",
+            "tz.bara_tani_juryo",
+            "tz.case_meisyo_nm",
+            "tz.bara_tani_meisyo_nm"
+        ], ($isGroupLot ? ['tz.lot1', 'tz.lot2', 'tz.lot3'] : []));
+        $qbGroup = DB::query()
+            ->select($groupNoneSoko)
+            ->selectRaw("ROW_NUMBER() OVER () as index")
+            ->selectRaw("SUM(tz.zaiko_su) as zaiko_su")
+            ->selectRaw("(SUM(tz.zaiko_su) * COALESCE(tz.bara_tani_juryo, 0)) AS zaiko_jyuryo")
+            ->selectRaw("CASE"
+                . " WHEN tz.irisu IS NOT NULL AND tz.irisu != 0 THEN DIV(SUM(tz.zaiko_su), tz.irisu)"
+                . " ELSE SUM(tz.zaiko_su)"
+                . " END AS zaiko_case_su")
+            ->selectRaw("CASE"
+                . " WHEN tz.irisu IS NOT NULL AND tz.irisu != 0 THEN MOD(SUM(tz.zaiko_su), tz.irisu)"
+                . " ELSE 0"
+                . " END AS zaiko_hasu")
+            ->fromSub($qb, 'tz')
+            ->groupBy($groupNoneSoko);
 
-        return [
-            'total' => $total,
-            'rows' => $list,
-        ];
+        if (!in_array(self::SHOW_OUT_OF_STOCK, data_get($request, 'option', []))) {
+            $qbGroup->havingRaw("SUM(tz.zaiko_su) > 0");
+        }
+        return $qbGroup;
     }
 
-    public function qbBySearchZaikoShoukai($request)
+    public function qbBySearchZaikoShoukai($request, $isGroupLot)
     {
-        $qb = DB::query()->newQuery()->from('t_zaiko');
-        $qb->leftJoin('m_bumon', 't_zaiko.bumon_cd', '=', 'm_bumon.bumon_cd');
-        $qb->leftJoin('m_ninusi', 't_zaiko.ninusi_cd', '=', 'm_ninusi.ninusi_cd');
+        $groups = [
+            't_zaiko.bumon_cd',
+            't_zaiko.ninusi_cd',
+            't_zaiko.soko_cd',
+            't_zaiko.hinmei_cd'
+        ];
+
+        if ($isGroupLot) {
+            $groups = array_merge($groups, [
+                't_zaiko.lot1',
+                't_zaiko.lot2',
+                't_zaiko.lot3'
+            ]);
+        }
+        $tZaiko = DB::query()
+            ->select($groups)
+            ->selectRaw("SUM(t_zaiko.su) AS su")
+            ->from('t_zaiko')
+            ->groupBy($groups);
+        $qb = DB::query()->fromSub($tZaiko, 't_zaiko')->select('t_zaiko.*');
 
         $qb->leftJoin('m_soko_hinmei', function ($join) {
             $join->on('t_zaiko.hinmei_cd', 'm_soko_hinmei.hinmei_cd')
                 ->on('t_zaiko.ninusi_cd', 'm_soko_hinmei.ninusi_cd');
         });
-        $qb->leftJoin('m_soko', function ($j) {
-            $j->on('t_zaiko.bumon_cd', 'm_soko.bumon_cd');
-            $j->on('t_zaiko.soko_cd', 'm_soko.soko_cd');
-        });
         if ($request->filled('search_bumon_cd')) {
             $qb->where('t_zaiko.bumon_cd', $request['search_bumon_cd']);
         }
-        if ($request->filled('search_bumon_nm')) {
-            $qb->where('m_bumon.bumon_nm', $request['search_bumon_nm']);
-        }
         if ($request->filled('search_ninusi_cd')) {
             $qb->where('t_zaiko.ninusi_cd', $request['search_ninusi_cd']);
-        }
-        if ($request->filled('search_ninusi_ryaku_nm')) {
-            $qb->where('m_ninusi.ninusi_ryaku_nm', $request['search_ninusi_ryaku_nm']);
         }
         if ($request->filled('search_soko_hinmei_cd_from')) {
             $qb->where('t_zaiko.hinmei_cd', '>=', $request['search_soko_hinmei_cd_from']);
@@ -168,6 +180,7 @@ class ZaikoShoukaiRepository
         if ($request->filled('search_soko_cd_to')) {
             $qb->where('t_zaiko.soko_cd', '<=', $request['search_soko_cd_to']);
         }
+        $qb->orderBy('t_zaiko.hinmei_cd');
         return $qb;
     }
 
@@ -182,7 +195,7 @@ class ZaikoShoukaiRepository
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '1' 
                           OR t_nyusyuko_head.nyusyuko_kbn = '4' 
                           OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su > 0) 
-                        THEN t_nyusyuko_meisai.case_su 
+                        THEN t_nyusyuko_meisai.case_su
                         ELSE 0 
                     END as in_case_su
             "),
@@ -190,7 +203,7 @@ class ZaikoShoukaiRepository
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '1' 
                           OR t_nyusyuko_head.nyusyuko_kbn = '4' 
                           OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su > 0) 
-                        THEN t_nyusyuko_meisai.hasu 
+                        THEN t_nyusyuko_meisai.hasu
                         ELSE 0 
                     END as in_hasu
             "),
@@ -198,28 +211,28 @@ class ZaikoShoukaiRepository
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '1' 
                           OR t_nyusyuko_head.nyusyuko_kbn = '4' 
                           OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su > 0) 
-                        THEN t_nyusyuko_meisai.su 
+                        THEN t_nyusyuko_meisai.su
                         ELSE 0 
                     END as in_su
             "),
             DB::raw("CASE 
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '2' 
                         OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su < 0) 
-                        THEN t_nyusyuko_meisai.case_su 
+                        THEN ABS(t_nyusyuko_meisai.case_su) 
                         ELSE 0 
                     END as out_case_su
             "),
             DB::raw("CASE 
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '2' 
                         OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su < 0) 
-                        THEN t_nyusyuko_meisai.hasu 
+                        THEN ABS(t_nyusyuko_meisai.hasu)
                         ELSE 0 
                     END as out_hasu
             "),
             DB::raw("CASE 
                         WHEN t_nyusyuko_head.nyusyuko_kbn = '2' 
                         OR (t_nyusyuko_head.nyusyuko_kbn = '5' AND t_nyusyuko_meisai.su < 0) 
-                        THEN t_nyusyuko_meisai.su 
+                        THEN ABS(t_nyusyuko_meisai.su)
                         ELSE 0 
                     END as out_su
             "),
@@ -266,7 +279,7 @@ class ZaikoShoukaiRepository
         return $qb;
     }
 
-    public function sumStringQuery($nyusyukoKbn, $isWhereLot = false, $isWhereKisanDtTo = false)
+    public function sumStringQuery($nyusyukoKbn, $isWhereLot = false)
     {
         return
             "COALESCE((
@@ -284,8 +297,6 @@ class ZaikoShoukaiRepository
                     AND t_zaiko.lot2 = t_nyusyuko_meisai.lot2
                     AND t_zaiko.lot3 = t_nyusyuko_meisai.lot3 " : '') . "
                     AND t_nyusyuko_head.nyusyuko_kbn = '$nyusyukoKbn'
-                    AND t_nyusyuko_head.kisan_dt >= ?"
-            . ($isWhereKisanDtTo ? " AND t_nyusyuko_head.kisan_dt <= ?" : '') . "
-             ), 0)";
+                    AND t_nyusyuko_head.kisan_dt > ?), 0)";
     }
 }

@@ -56,7 +56,7 @@ class NyusyukoNyuryokuRepository
                 DB::raw('ABS(nyum.case_su) as case_su'),
                 DB::raw('ABS(nyum.hasu) as hasu'),
                 DB::raw('ABS(nyum.su) as su'),
-                'nyum.jyuryo',
+                DB::raw('ABS(nyum.jyuryo) as jyuryo'),
                 'nyum.soko_cd',
                 'nyum.tani_cd',
                 'nyum.location',
@@ -84,6 +84,21 @@ class NyusyukoNyuryokuRepository
                         AND meisai_to.su > 0 AND meisai_to.nyusyuko_den_meisai_no = nyum.nyusyuko_den_meisai_no + 1
                         LIMIT 1
                     ) as soko_cd_to
+                "),
+                DB::raw("
+                    (
+                        SELECT m_soko_to.soko_nm 
+                        FROM t_nyusyuko_meisai as meisai_to
+                        LEFT JOIN m_soko as m_soko_to ON m_soko_to.soko_cd = meisai_to.soko_cd
+                        WHERE meisai_to.nyusyuko_den_no = nyum.nyusyuko_den_no
+                        AND (meisai_to.lot1 = nyum.lot1 OR (meisai_to.lot1 IS NULL AND nyum.lot1 IS NULL))
+                        AND (meisai_to.lot2 = nyum.lot2 OR (meisai_to.lot2 IS NULL AND nyum.lot2 IS NULL))
+                        AND (meisai_to.lot3 = nyum.lot3 OR (meisai_to.lot3 IS NULL AND nyum.lot3 IS NULL))
+                        AND meisai_to.hinmei_cd = nyum.hinmei_cd
+                        AND meisai_to.su > 0 AND meisai_to.nyusyuko_den_meisai_no = nyum.nyusyuko_den_meisai_no + 1
+                        AND m_soko_to.bumon_cd = nyuh.bumon_cd
+                        LIMIT 1
+                    ) as soko_nm_to
                 "),
                 DB::raw("
                     (
@@ -304,6 +319,7 @@ class NyusyukoNyuryokuRepository
                                 $meisaiFrom['case_su'] = ceil($meisaiFrom['su'] / $irisu) ;
                             }
                             $meisaiFrom['hasu'] =  $meisaiFrom['su'] % $irisu;
+                            $meisaiFrom['jyuryo'] = -1 * $meisaiFrom['jyuryo'];
                             $recordMeisaiFrom->update($meisaiFrom);
 
                             $this->__updateTzaikoCaseKbn5($recordHead, $recordMeisaiFrom, $ninusi, 2, $irisu);
@@ -487,7 +503,7 @@ class NyusyukoNyuryokuRepository
                                 $meisaiFrom['case_su'] =  ceil($meisaiFrom['su'] / $irisu);
                             }
                             $meisaiFrom['hasu'] =  $meisaiFrom['su'] % $irisu;
-                            
+                            $meisaiFrom['jyuryo'] = -1 * $meisaiFrom['jyuryo'];
                             $recordMeisaiFrom = TNyusyukoMeisai::create($meisaiFrom);
                             $this->__createTZaikoCaseKbn5($recordHead, $recordMeisaiFrom, $ninusi, 2, $irisu);
 
@@ -506,6 +522,13 @@ class NyusyukoNyuryokuRepository
                             $this->__createTZaikoCaseKbn5($recordHead, $recordMeisaiTo, $ninusi, 1, $irisu);
                             continue;
                         }
+                        $irisu = !empty($meisai['irisu']) ? $meisai['irisu'] : 1;
+                        if($meisai['su'] >= 0) {
+                            $meisai['case_su'] =  floor($meisai['su'] / $irisu);
+                        } else {
+                            $meisai['case_su'] =  ceil($meisai['su'] / $irisu);
+                        }
+                        $meisai['hasu'] =  $meisai['su'] % $irisu;
                         $recordMeisai =  TNyusyukoMeisai::create($meisai);
                         
                         $dataZaiko = [
@@ -685,7 +708,7 @@ class NyusyukoNyuryokuRepository
                     $zaikoDelete = $zaikoDelete->first();
                     if(!empty($zaikoDelete)) {
                         $su = $recordHead->nyusyuko_kbn == 1 || $recordHead->nyusyuko_kbn == 4 || $recordHead->nyusyuko_kbn == 5? ($zaikoDelete->su - $recordMeisai->su) : ($zaikoDelete->su + $recordMeisai->su);
-                        $irisu = !empty($sokoHinmei) ? ( $sokoHinmei->irisu ?? 1 ) : 1;
+                        $irisu = !empty($sokoHinmei) ? ( !empty($sokoHinmei->irisu) ? $sokoHinmei->irisu : 1 ) : 1;
                         if($su >= 0) {
                             $caseSu = floor($su / $irisu);
                         } else {

@@ -115,11 +115,17 @@ return [
         [   // row2
             'A' => ['field' => 'jyutyu_kbn_nm'],//受注区分
             'B' => ['field' => 'hatuti_nm'],//着地
+            // 'C' => ['value' => function($row) {
+            //     $jikoku = data_get($row, 'jikoku', '');
+            //     return \App\Helpers\Formatter::datetime(data_get($row, 'haitatu_dt'), 'm/d')
+            //             . ($jikoku ? ' ' . \App\Helpers\Formatter::datetime($jikoku, 'H:i') . '指' : '');
+            // }, 'type' => $exp::DATA_CLOSURE],//着地
             'C' => ['value' => function($row) {
-                $jikoku = data_get($row, 'jikoku', '');
-                return \App\Helpers\Formatter::datetime(data_get($row, 'haitatu_dt'), 'm/d')
-                        . ($jikoku ? ' ' . \App\Helpers\Formatter::datetime($jikoku, 'H:i') . '指' : '');
-            }, 'type' => $exp::DATA_CLOSURE],//着地
+                if(!empty($row->jikoku) || $row->jikoku === '0') {
+                    return \App\Helpers\Formatter::datetime(data_get($row, 'haitatu_dt'), 'm/d') . ' ' .$row->jikoku  . '指';
+                }
+                return \App\Helpers\Formatter::datetime(data_get($row, 'haitatu_dt'), 'm/d');
+            }],
             'D' => ['field' => 'biko'],//備考
             //'D' => ['field' => ''],
             //'E' => ['field' => ''],//傭車単価

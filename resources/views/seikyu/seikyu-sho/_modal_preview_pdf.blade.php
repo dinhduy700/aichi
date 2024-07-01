@@ -8,7 +8,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"></h5>
-        <button onclick="printPDF()" class="btn btn-primary">印刷</button>
+        <button onclick="printPDF()" class="btn btn-primary mr-1">印刷</button>
+        <button data-href="{{ route('seikyu.seikyu_sho.exp.downloadPdf') }}" onclick="downloadPDF(this)" class="btn btn-primary">ダウンロード</button>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

@@ -40,4 +40,5 @@ return [
     'updated2' => "更新しました。",
     'no_data' => "データがありません。",
     'error_summary_header' => '入力エラーがありますので、再確認お願い致します。',
+    'no_choice_type' => '帳票選択してください'
 ];

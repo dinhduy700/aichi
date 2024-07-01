@@ -10,6 +10,7 @@ use Exception;
 
 use App\Helpers\Csv\SeikyuCsvExport;
 use App\Helpers\Excel\XlsSeikyusyo;
+use App\Helpers\Pdf\PdfSeikyusyo;
 use App\Http\Repositories\Seikyu\SeikyuRepository;
 use App\Http\Requests\Seikyu\SeikyuRequest;
 
@@ -42,10 +43,7 @@ class SeikyuExportController extends Controller
         $listData   = $this->seikyuRepository->getListWithTotalCount($request);
 
         $data['total'] = $listData['total'];
-        $data['rows'] = $listData['rows']
-            ->offset(($page - 1) * $perPage)
-            ->limit($perPage)
-            ->get();
+        $data['rows'] = $listData['rows']->get();
 
         return response()->json($data);
     }
@@ -78,15 +76,17 @@ class SeikyuExportController extends Controller
 
     public function pdf(Request $request)
     {
-        $outDir                     = storage_path('app/download');
-        $fileNm                     = date('YmdHis') . '_t_uriage.xlsx';
-        list($fileName, $xlsPath)   = $this->exportExcel($request, $outDir, $fileNm);
-        cnvXlsToPdf($xlsPath, $outDir);
-        File::delete($xlsPath);
-        $fileName    = str_replace('.xlsx', '.pdf', $fileName);
+        $qb         = $this->seikyuRepository->applyRequestToBuilder($request);
+        $data       = $qb->get();
+        $pdf        = new PdfSeikyusyo();
         
+        $listZaikoHokanryoByNinusiCd = $this->seikyuRepository->getSumKinZaikoHokanryo($request)
+                                ->get()->keyBy('ninusi_cd');
+
+        $newFileName = $pdf->export($data, $listZaikoHokanryoByNinusiCd);
+
         return response()->json([
-            'path' => route('seikyu.seikyu_sho.exp.previewPdf', ['file_name' => $fileName]),
+            'path' => route('seikyu.seikyu_sho.exp.previewPdf', ['file_name' => $newFileName]),
         ]);
     }
 
@@ -95,8 +95,29 @@ class SeikyuExportController extends Controller
         $fileName   = request('file_name');
         $pdfPath    = storage_path('app' . DIRECTORY_SEPARATOR . 'download' . DIRECTORY_SEPARATOR . $fileName);
         
-         return response()->file($pdfPath, ['Content-Disposition' => 'filename="' . $fileName . '"'])
+        if (file_exists($pdfPath)) {
+            return response()->file($pdfPath, ['Content-Disposition' => 'filename="' . $fileName . '"'])
             ->deleteFileAfterSend(true);
+        } 
+        
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $outDir     = storage_path('app/download');
+
+        $qb         = $this->seikyuRepository->applyRequestToBuilder($request);
+        $data       = $qb->get();
+        $pdf        = new PdfSeikyusyo();
+
+        $listZaikoHokanryoByNinusiCd = $this->seikyuRepository->getSumKinZaikoHokanryo($request)
+                                ->get()->keyBy('ninusi_cd');
+
+        $newFileName = $pdf->export($data, $listZaikoHokanryoByNinusiCd);
+
+        $pdfPath = $outDir . DIRECTORY_SEPARATOR . $newFileName;
+
+        return response()->download($pdfPath, $newFileName)->deleteFileAfterSend(true);
     }
 
     private function exportExcel(Request $request, $outDir, $fileName)
@@ -105,6 +126,9 @@ class SeikyuExportController extends Controller
 
         $qb         = $this->seikyuRepository->applyRequestToBuilder($request);
         $data       = $qb->get();
+
+        $listZaikoHokanryoByNinusiCd = $this->seikyuRepository->getSumKinZaikoHokanryo($request)
+                                                                ->get()->keyBy('ninusi_cd');
 
         $config     = require(app_path('Helpers/Excel/config/t_uriage_seikyu.php'));
 
@@ -120,17 +144,10 @@ class SeikyuExportController extends Controller
 
         //見出指定
         $config['midasisitei'] = data_get($request, 'exp.midasisitei') == 3 ? 2 : 1;
-        switch (data_get($request, 'exp.midasisitei')) {
-            case 1:
-                $template = 't_uriage_seikyu.xlsx';
-                break;
-            case 2:
-                $template = 't_uriage_seikyu__control.xlsx';
-                break;
-            case 3:
-                $template = 't_uriage_seikyu.xlsx';
-                break;
-        }
+
+        $template = 't_uriage_seikyu_f.xlsx';
+
+        $config['listZaikoHokanryoByNinusiCd'] = $listZaikoHokanryoByNinusiCd;
 
         $exporter->export(
             app_path('Helpers/Excel/template/' . $template),//template

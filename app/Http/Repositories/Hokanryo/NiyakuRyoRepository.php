@@ -169,6 +169,9 @@ class NiyakuRyoRepository
         $qb->addSelectSuGroup('ki3_nyuko');
         $qb->addSelectSuGroup('ki3_syuko');
         $qb->addSelectSuGroup('touzan');
+        $qb->addSelectSuGroup('seki');
+        $qb->addSelectSuGroup('nyuko');
+        $qb->addSelectSuGroup('syuko');
 
         foreach (['seki_su', 'nyuko_su', 'syuko_su'] as $su) {
             $qb->selectRaw($model::getSelectRawField('juryo', [

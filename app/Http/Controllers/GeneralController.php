@@ -49,19 +49,45 @@ class GeneralController extends Controller
                             ->get();
                 break;
             case 'hachaku_cd':
-                $data = DB::table('m_hachaku')
+                $qb = DB::table('m_hachaku')
                             ->select('*')
-                            ->where('hachaku_cd', 'ILIKE', strtolower($value))
-                            ->orderBy('hachaku_cd', 'DESC')
+                            ->where('hachaku_cd', 'ILIKE', strtolower($value));
+                if (!empty($request->otherWhere)) {
+                    $ninusiCd = data_get($request->otherWhere, 'ninusi_cd', 0);
+                    if(!empty($ninusiCd)) {
+                        $hachaku = DB::table('m_hachaku')->where('ninusi_id', $ninusiCd)->get();
+                        if($hachaku->isEmpty()) {
+                            $ninusiCd = 0;
+                        }
+                    }
+                    if($request->filled('otherWhere.ninusi_cd')) {
+                        $qb->where('ninusi_id', $ninusiCd);
+                    }
+                }
+                $data = $qb->orderBy('hachaku_cd', 'ASC')
                             ->limit(configParam('LIMIT_SUGGEST'))
                             ->get();
                 break;
             case 'hachaku_nm':
-                $data = DB::table('m_hachaku')
-                            ->select('*')
-                            ->where(DB::raw('LOWER(hachaku_nm)'), 'ILIKE', strtolower($value))
-                            ->orWhere(DB::raw('LOWER(kana)'), 'ILIKE', strtolower($value))
-                            ->orderBy('hachaku_cd', 'DESC')
+                $qb = DB::table('m_hachaku')
+                            ->select('*');
+                if (!empty($request->otherWhere)) {
+                    $ninusiCd = data_get($request->otherWhere, 'ninusi_cd', 0);
+                    if(!empty($ninusiCd)) {
+                        $hachaku = DB::table('m_hachaku')->where('ninusi_id', $ninusiCd)->get();
+                        if($hachaku->isEmpty()) {
+                            $ninusiCd = 0;
+                        }
+                    }
+                    if($request->filled('otherWhere.ninusi_cd')) {
+                        $qb->where('ninusi_id', $ninusiCd);
+                    }
+                }          
+                $qb = $qb->where(function($query) use ($value) {
+                    $query->where(DB::raw('LOWER(hachaku_nm)'), 'ILIKE', strtolower($value))
+                            ->orWhere(DB::raw('LOWER(kana)'), 'ILIKE', strtolower($value));
+                });
+                $data = $qb->orderBy('hachaku_cd', 'ASC')
                             ->limit(configParam('LIMIT_SUGGEST'))
                             ->get();
                 break;
@@ -153,7 +179,7 @@ class GeneralController extends Controller
                             ->where([
                                 ['meisyo_cd', 'ILIKE', $value],
                                 ['meisyo_kbn', '=', configParam('MEISYO_KBN_TANI')],
-                            ])->orderBy('meisyo_cd', 'DESC')->limit(configParam('LIMIT_SUGGEST'))->get();
+                            ])->orderBy('meisyo_cd', 'ASC')->limit(configParam('LIMIT_SUGGEST'))->get();
                 break;
             case 'tani_nm': 
                 $data = DB::table('m_meisyo')
@@ -165,7 +191,7 @@ class GeneralController extends Controller
                         ->where([
                             ['meisyo_nm', 'ILIKE', $value],
                             ['meisyo_kbn', '=', configParam('MEISYO_KBN_TANI')],
-                        ])->orderBy('meisyo_cd', 'DESC')->limit(configParam('LIMIT_SUGGEST'))->get();
+                        ])->orderBy('meisyo_cd', 'ASC')->limit(configParam('LIMIT_SUGGEST'))->get();
                 break;
             case 'jyutyu_kbn':
                 $data = MMeisyo::select('kana')->kbn(configParam('MEISYO_KBN_JYUTYU'), 'jyutyu_kbn', 'jyutyu_kbn_nm')
@@ -274,7 +300,7 @@ class GeneralController extends Controller
                 $data = DB::table('m_hachaku')
                     ->select('*', \DB::raw('hachaku_cd as hatuti_cd'), \DB::raw('hachaku_nm as hatuti_nm'))
                     ->where('hachaku_cd', 'ILIKE', $value)
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -285,7 +311,7 @@ class GeneralController extends Controller
                         $query->where('hachaku_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;

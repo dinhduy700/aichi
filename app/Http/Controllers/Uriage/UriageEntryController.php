@@ -127,20 +127,20 @@ class UriageEntryController extends Controller
                 break;
             case 'hatuti_cd':
                 $data = \DB::table('m_hachaku')
-                    ->select('*', \DB::raw('hachaku_cd as hatuti_cd'), \DB::raw('hachaku_nm as hatuti_nm'))
+                    ->select('*', \DB::raw('hachaku_cd as hatuti_cd'), \DB::raw('hachaku_nm as hatuti_nm'), \DB::raw('hachaku_nm as hatuti_hachaku_nm'))
                     ->where('hachaku_cd', 'ILIKE', $value)
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
             case 'hatuti_nm':
                 $data = \DB::table('m_hachaku')
-                    ->select('*', \DB::raw('hachaku_cd as hatuti_cd'), \DB::raw('hachaku_nm as hatuti_nm'))
+                    ->select('*', \DB::raw('hachaku_cd as hatuti_cd'), \DB::raw('hachaku_nm as hatuti_nm'), \DB::raw('hachaku_nm as hatuti_hachaku_nm'))
                     ->where(function ($query) use ($value) {
                         $query->where('hachaku_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -188,7 +188,7 @@ class UriageEntryController extends Controller
                 $data = \DB::table('m_hachaku')
                     ->select('*')
                     ->where('hachaku_cd', 'ILIKE', $value)
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -199,7 +199,7 @@ class UriageEntryController extends Controller
                         $query->where('hachaku_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
-                    ->orderBy('hachaku_cd', 'DESC')
+                    ->orderBy('hachaku_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -234,6 +234,7 @@ class UriageEntryController extends Controller
                         $qb = $qb->where('m_hinmei.ninusi_id', $request->list_check['ninusi_cd']);
                     }
                 }
+                $qb = $qb->orderBy('hinmei_cd', 'DESC');
                 $data = $qb->limit(configParam('LIMIT_SUGGEST'))->get();
                 break;
             case 'hinmei_nm':
@@ -248,7 +249,8 @@ class UriageEntryController extends Controller
                     if($request->filled('list_check.ninusi_cd') && $request->list_check['ninusi_cd']) {
                         $qb = $qb->where('m_hinmei.ninusi_id', $request->list_check['ninusi_cd']);
                     }
-                }    
+                }
+                $qb = $qb->orderBy('hinmei_cd', 'DESC');    
                 $data = $qb->limit(configParam('LIMIT_SUGGEST'))->get();
                 break;
             case 'hinmoku_nm':
@@ -267,7 +269,7 @@ class UriageEntryController extends Controller
                     ->select('*', \DB::raw('meisyo_nm as tani_nm'), \DB::raw('meisyo_cd as tani_cd'))
                     ->where('meisyo_cd', 'ILIKE', $value)
                     ->where('meisyo_kbn', configParam('MEISYO_KBN_TANI'))
-                    ->orderBy('meisyo_cd', 'DESC')
+                    ->orderBy('meisyo_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -280,7 +282,7 @@ class UriageEntryController extends Controller
                             ->orWhere('kana', 'ILIKE', $value);
                     })
                     ->where('meisyo_kbn', configParam('MEISYO_KBN_TANI'))
-                    ->orderBy('meisyo_cd', 'DESC')
+                    ->orderBy('meisyo_cd', 'ASC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -311,6 +313,7 @@ class UriageEntryController extends Controller
                 $data = \DB::table('m_biko')
                     ->select('*', \DB::raw('biko_nm as biko'))
                     ->where('biko_cd', 'ILIKE', $value)
+                    ->orderBy('biko_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -322,6 +325,7 @@ class UriageEntryController extends Controller
                         $query->orWhere('biko_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
+                    ->orderBy('biko_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -329,6 +333,7 @@ class UriageEntryController extends Controller
                 $data = \DB::table('m_jyomuin')
                     ->select('*')
                     ->where('jyomuin_cd', 'ILIKE', $value)
+                    ->orderBy('jyomuin_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -340,6 +345,7 @@ class UriageEntryController extends Controller
                         $query->orWhere('jyomuin_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
+                    ->orderBy('jyomuin_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -348,6 +354,7 @@ class UriageEntryController extends Controller
                 $data = \DB::table('m_jyomuin')
                     ->select('*', \DB::raw('jyomuin_cd as add_tanto_cd'), \DB::raw('jyomuin_nm as add_tanto_nm'))
                     ->where('jyomuin_cd', 'ILIKE', $value)
+                    ->orderBy('jyomuin_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -359,6 +366,7 @@ class UriageEntryController extends Controller
                         $query->orWhere('jyomuin_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
+                    ->orderBy('jyomuin_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -367,6 +375,7 @@ class UriageEntryController extends Controller
                 $data = \DB::table('m_yousya')
                     ->select('*', \DB::raw('yousya_ryaku_nm as yousya_nm'))
                     ->where('yousya_cd', 'ILIKE', $value)
+                    ->orderBy('yousya_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -378,6 +387,7 @@ class UriageEntryController extends Controller
                         $query->orWhere('yousya_ryaku_nm', 'ILIKE', $value)
                             ->orWhere('kana', 'ILIKE', $value);
                     })
+                    ->orderBy('yousya_cd', 'DESC')
                     ->limit(configParam('LIMIT_SUGGEST'))
                     ->get();
                 break;
@@ -480,13 +490,34 @@ class UriageEntryController extends Controller
                                         ->orderBy('hachaku_cd', 'DESC')
                                         ->get();
                                 break;
-                            
+                            case 'haitatu_tel': 
+                                $data[$field]  = \DB::table('m_ninusi')
+                                                ->select('m_ninusi.tel')
+                                                ->Where('m_ninusi.ninusi_cd', $request->value_from)
+                                                ->get();
+                                break;
                             default:
                                 # code...
                                 break;
                         }
                         break;
-                    
+                    case 'hinmei_cd': 
+                        switch ($field) {
+                            case 'tani_cd':
+                                $data[$field] = \DB::table('m_hinmei')
+                                            ->select('m_hinmei.tani_cd', \DB::raw('m_meisyo_tani.meisyo_nm as tani_nm'))
+                                            ->leftJoin('m_meisyo as m_meisyo_tani', function($query) {
+                                                $query->on('m_meisyo_tani.meisyo_cd', '=', 'm_hinmei.tani_cd');
+                                                $query->where('m_meisyo_tani.meisyo_kbn', '=', configParam('MEISYO_KBN_TANI'));
+                                            })
+                                            ->where('m_hinmei.hinmei_cd', $request->value_from)
+                                            ->get();
+                                break;
+                            
+                            default:
+                                # code...
+                                break;
+                        }
                     default:
                         # code...
                         break;
@@ -663,6 +694,7 @@ class UriageEntryController extends Controller
 
     public function valdateFormSearchUriage(UriageFormSearchRequest $request)
     {   
+        $this->updateInitSearch($request);
         return response()->json([
             'status' => Response::HTTP_OK,
         ]);
@@ -798,12 +830,9 @@ class UriageEntryController extends Controller
                                 $initCopy[str_replace('hinmei_cd', 'hinmoku_nm', $init->{'choice' . $value['index'] . '_nm'})] = $result->hinmoku_nm;
                                 continue;
                             }
-                        } else if($key == 'tani_cd_from' || $key == 'tani_cd_to') {
-                            $result = \DB::table('m_meisyo')
-                                ->select('*', \DB::raw('meisyo_nm as tani_nm'), \DB::raw('meisyo_cd as tani_cd'))
-                                ->where('meisyo_cd', $init->{'choice' . $value['index'] .'_char'})
-                                ->where('meisyo_kbn', configParam('MEISYO_KBN_TANI'))
-                                ->first();
+                        } else if($key == 'tani') {
+                            $initCopy[$key] = $init->{'choice'. $value['index'] . '_char'};
+                            continue;
                         } else if($key == 'gyosya_cd_from' || $key == 'gyosya_cd_to') {
                             $result = \DB::table('m_meisyo')
                                 ->select('*', \DB::raw('meisyo_nm as gyosya_nm'), \DB::raw('meisyo_cd as gyosya_cd'))
@@ -887,12 +916,12 @@ class UriageEntryController extends Controller
 
     private function __getKeyInitSearch() {
         return [
-            // 'hed_unso_dt_from' => [
-            //     'index' => 3
-            // ],
-            // 'hed_unso_dt_to' => [
-            //     'index' => 4
-            // ],
+            'hed_unso_dt_from' => [
+                'index' => 3
+            ],
+            'hed_unso_dt_to' => [
+                'index' => 4
+            ],
             'bumon_cd_from' => [
                 'index' => 5,
                 'table' => 'm_bumon'

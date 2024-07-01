@@ -117,8 +117,7 @@
                 <label class="mb-0">商品名</label>
               </div>
               <div class="col-md-6 p-0">
-                <input type="text" class="form-control" name="search_soko_hinmei_nm"
-                       onkeyup="suggestionForm(this, 'soko_hinmei_nm', ['hinmei_cd', 'kana', 'hinmei_nm'], {'hinmei_nm': 'search_soko_hinmei_nm'}, $(this).parent())">
+                <input type="text" class="form-control" name="search_soko_hinmei_nm">
                 <ul class="suggestion"></ul>
                 <span class="error-message-row" id="search_soko_hinmei_nm"></span>
               </div>
@@ -263,19 +262,6 @@
       url = url.replace('_kisanDt', encodeURIComponent($("[name='search_kisan_dt']").val()));
       value = '受払照会';
       return '<a href="#" data-href="' + url + '" class="btn btn-primary text-white rounded btn-in-list" onclick="redirectForm(this, false, \'index\', $(\'table\'))">' + value + '</a>'
-    }
-
-    function formatZaikoCaseSu(value, row, index, name) {
-      return Math.floor(row.zaiko_su / row.irisu);
-    }
-
-    function formatZaikoHaSu(value, row, index, name) {
-      return row.zaiko_su % row.irisu;
-    }
-
-    function formatZaikoJuryo(value, row, index, name) {
-      let result = row.zaiko_su * row.bara_tani_juryo;
-      return result.toFixed(3)
     }
 
     function submitToUrl(e, url) {

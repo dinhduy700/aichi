@@ -5,19 +5,23 @@ namespace App\Http\Repositories\HanyouKensaku;
 
 
 use App\Models\TUriage;
+use DB;
 
 class MikakuteiUnchinListRepository
 {
     public function getListWithTotalCount($request)
     {
-        $qb = TUriage::query()->select('t_uriage.*');
+        $qb = TUriage::query()->select('t_uriage.*', DB::raw('t_uriage.hatuti_hachaku_nm as hatuti_nm'));
         $qb->where('t_uriage.unchin_mikakutei_kbn', '1');
 
         $qb->joinMNinusi()->addSelect('m_ninusi.ninusi1_nm');
         $qb->joinMJyomuin()->addSelect('m_jyomuin.jyomuin_nm');
-        $qb->joinHatuti()->addSelect('m_hatuti.hachaku_nm AS hatuti_nm');
-        $qb->joinMHachaku()->addSelect('m_hachaku.hachaku_nm');
-        $qb->joinMHinmei()->addSelect('m_hinmei.hinmei_nm');
+        // $qb->joinHatuti()->addSelect('m_hatuti.hachaku_nm AS hatuti_nm');
+        $qb->joinHatuti();
+        // $qb->joinMHachaku()->addSelect('m_hachaku.hachaku_nm');
+        $qb->joinMHachaku();
+        // $qb->joinMHinmei()->addSelect('m_hinmei.hinmei_nm');
+        $qb->joinMHinmei();
         $qb->joinMMeisyoTani()->addSelect('m_meisyo_tani.meisyo_nm AS tani_nm');
 
         $qb->orderBy('t_uriage.seikyu_sime_dt');

@@ -150,8 +150,10 @@ class UriageFormSearchRequest extends FormRequest
             'yosya_kin_tax_from' => ['regex:/^-?(0|[1-9]\d{0,9})(?<!-0)$/', 'nullable'],
             'yosya_kin_tax_to' => ['regex:/^-?(0|[1-9]\d{0,9})(?<!-0)$/', 'nullable'],
 
-            'jikoku_from' => 'date_format:H:i:s|nullable',
-            'jikoku_to' => 'date_format:H:i:s,Y-m-d|nullable', 
+            // 'jikoku_from' => 'date_format:H:i:s|nullable',
+            // 'jikoku_to' => 'date_format:H:i:s,Y-m-d|nullable', 
+            'jikoku_from' => 'nullable|max:255',
+            'jikoku_to' => 'nullable|max:255',
 
             'add_tanto_cd_from' => 'nullable|exists:m_jyomuin,jyomuin_cd',
             'add_tanto_cd_to' => 'nullable|exists:m_jyomuin,jyomuin_cd',

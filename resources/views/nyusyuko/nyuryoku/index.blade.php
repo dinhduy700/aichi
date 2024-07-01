@@ -1,5 +1,6 @@
 @extends('layouts.master')
 @section('css')
+<link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" />
 <style>
   #ui-datepicker-div {
     z-index: 1051 !important;
@@ -85,6 +86,26 @@
   {
     display: none;
   }
+
+  select[name="hed_nyusyuko_kbn"] + .select2 .select2-container .select2-selection--single
+  {
+    
+  }
+  select[name="hed_nyusyuko_kbn"] + .select2 .select2-selection.select2-selection--single
+  {
+    padding: 0 5px;
+    line-height: 33px;
+    height: 33px;
+    border-color: #CED4DA;
+  }
+
+  select[name="hed_nyusyuko_kbn"] + .select2.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 33px;
+  }
+
+  select[name="hed_nyusyuko_kbn"][disabled] + .select2 {
+    opacity: 0.5;
+  }
 </style>
 @endsection
 @section('page-content')
@@ -99,9 +120,9 @@
                 <div class="group-input" style="display: flex;  grid-gap: 10px; flex-wrap: nowrap;">
                   <label class="col-form-label label-search-uriage" >部門</label>
                   <div class="group-input" style="flex-wrap: wrap; display: flex; flex: 1; position: relative; ">
-                    <input type="text" class=" active-head form-control size-M" name="hed_bumon_cd" style="width: 100px; border-bottom-right-radius: 0; border-top-right-radius: 0" onkeyup="suggestionForm(this, 'bumon_cd', ['bumon_cd', 'kana', 'bumon_nm'], {'bumon_cd': 'hed_bumon_cd', 'bumon_nm': 'hed_bumon_nm'}, $(this).parent())" style="" autocomplete="off">
+                    <input type="text" class=" active-head form-control size-M" name="hed_bumon_cd" style="width: 100px; border-bottom-right-radius: 0; border-top-right-radius: 0" onkeyup="suggestionForm(this, 'bumon_cd', ['bumon_cd', 'kana', 'bumon_nm'], {'bumon_cd': 'hed_bumon_cd', 'bumon_nm': 'hed_bumon_nm'}, $(this).parent()), keyupBumon(this, event)" style="" autocomplete="off">
 
-                    <input class="active-head form-control size-L" name="hed_bumon_nm" style="border-bottom-left-radius: 0; border-top-left-radius: 0" onkeyup="suggestionForm(this, 'bumon_nm', ['bumon_cd', 'kana', 'bumon_nm'], {'bumon_cd': 'hed_bumon_cd', 'bumon_nm': 'hed_bumon_nm'}, $(this).parent())" autocomplete="off">
+                    <input class="active-head form-control size-L" name="hed_bumon_nm" style="border-bottom-left-radius: 0; border-top-left-radius: 0" onkeyup="suggestionForm(this, 'bumon_nm', ['bumon_cd', 'kana', 'bumon_nm'], {'bumon_cd': 'hed_bumon_cd', 'bumon_nm': 'hed_bumon_nm'}, $(this).parent()), keyupBumon(this, event)" autocomplete="off">
                     <ul class="suggestion"></ul>
                     <div class="" style="width: 100%">
                       <span class="text-danger error_message"  id="error-hed_bumon_cd"></span>
@@ -203,9 +224,9 @@
                     <label class="col-12 col-md-2 col-form-label text-nowrap ">荷届先</label>
                     <div class="col-12 col-md-8 group-input">
                       <div class="flex-suggestion" style="">
-                        <input type="text" class="form-control size-M" name="hachaku_cd" style="width: 100px; border-bottom-right-radius: 0; border-top-right-radius: 0" onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'kana', 'hachaku_nm'], {'hachaku_cd': 'hachaku_cd', 'hachaku_nm': 'todokesaki_nm'}, $(this).parent())" style="" autocomplete="off">
+                        <input type="text" class="form-control size-M" data-other_where="input[name=ninusi_cd]" name="hachaku_cd" style="width: 100px; border-bottom-right-radius: 0; border-top-right-radius: 0" onkeyup="suggestionForm(this, 'hachaku_cd', ['hachaku_cd', 'kana', 'hachaku_nm'], {'hachaku_cd': 'hachaku_cd', 'hachaku_nm': 'todokesaki_nm'}, $(this).parent())" style="" autocomplete="off">
 
-                        <input class="form-control size-L" name="todokesaki_nm" style="border-bottom-left-radius: 0; border-top-left-radius: 0" onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'kana', 'hachaku_nm'], {'hachaku_cd': 'hachaku_cd', 'hachaku_nm': 'todokesaki_nm'}, $(this).parent())" autocomplete="off">
+                        <input class="form-control size-L" data-other_where="input[name=ninusi_cd]" name="todokesaki_nm" style="border-bottom-left-radius: 0; border-top-left-radius: 0" onkeyup="suggestionForm(this, 'hachaku_nm', ['hachaku_cd', 'kana', 'hachaku_nm'], {'hachaku_cd': 'hachaku_cd', 'hachaku_nm': 'todokesaki_nm'}, $(this).parent())" autocomplete="off">
                         <ul class="suggestion"></ul>
                       </div>
                       <div>
@@ -318,7 +339,9 @@
                     <label class="col-12 col-md-2 col-form-label text-nowrap ">伝票日付</label>
                     <div class="col-md-3">
                       <div class="group-input">
-                        <input type="text" class="form-control" name="denpyo_dt" onchange="autoFillDate(this)">
+                        <input type="text" class="form-control" name="denpyo_dt" onchange="autoFillDate(this)"
+                          onblur="onblurDenpyoDt(this)"
+                        >
                         <div>
                           <span class="text-danger error_message" id="error-denpyo_dt"></span>
                         </div>
@@ -350,7 +373,6 @@
                     <div class="col-md-3">
                       <div class="group-input">
                         <select class="form-control" name="nieki_futan_kbn">
-                          <option value=""></option>
                           <option value="1">有償</option>
                           <option value="2">無償</option>
                         </select>
@@ -690,6 +712,7 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('assets/js/select2.min.js') }}"></script>
 <script>
   $('#table').data('customTableSettings', {urlSearchSuggestion:'{{route('master-suggestion')}}'});
   var useAddFormFooter = true;
@@ -699,6 +722,9 @@
   var nyusyukoMeisai = null;
   var columns = null;
   var columnDefault = null;
+  var initCopy = null;
+  var initCheckBox = @if(!empty($init)) {{ $init->choice1_bool ? 'true' : 'false' }}  @else {{ 'null' }} @endif;
+  var currentDateSystem = "{{ \Carbon\Carbon::now()->format('Y/m/d') }}";
   function searchList(e) {
     if($('input[name="hed_nyusyuko_den_no"]').val()) {
       if($('.bootstrap-table').length > 0) {
@@ -714,6 +740,7 @@
           if(res.setting) {
             columns = res.setting;
             columnDefault = res.setting;
+            initCopy = res.initCopy;
             var columnFake = [...columns];
             columnFake[6].visible = false;
             columnFake[7].visible = false;
@@ -832,7 +859,8 @@
         defaultSearchForm: false,
         isShow: false, // if is true will be show list when init
         usingPaginateTop: true,
-        initCopy: @json($dataInit)
+        initCopy: initCopy,
+        isResize: true
       });
   } 
 
@@ -883,11 +911,15 @@
       $('select[name="hed_nyusyuko_kbn"]').val(nyusyukoHead.nyusyuko_kbn).trigger('change');
       $('input[name="hed_bumon_cd"]').val(nyusyukoHead.hed_bumon_cd).trigger('change');
       $('input[name="hed_bumon_nm"]').val(nyusyukoHead.hed_bumon_nm).trigger('change');
+      if (!nyusyukoHead.nieki_futan_kbn) {
+        $('select[name=nieki_futan_kbn]').val(1);
+      }
       $('.btn-delete').css('display', 'block');
     } else {
       $('#form-nyusyuko_head').find('input, select').prop('disabled', false);
       $('#form-nyusyuko_head').find('input, select').val('');
       $('.btn-delete').css('display', 'none');
+      $('select[name=nieki_futan_kbn]').val(1);
       nyusyukoHead = {};
     }
     uriage = data.uriage;
@@ -1003,6 +1035,7 @@
           createCustomTable(res.setting);
           columns = res.setting;
           columnDefault = res.setting;
+          initCopy = res.initCopy;
           $('.class-show').removeClass('active');
           $.fn.customTable.searchList();
           $.fn.customTable.callbackAfterShow(showHead);
@@ -1021,6 +1054,9 @@
             $('input[name="syamei_print_kbn"]').prop('disabled', false);
             $('input[name="nouhinsyo_kbn"]').prop('disabled', false);
             $('input[name="nouhinsyo_kbn"]').prop('checked', true);
+          }
+          if(initCheckBox !== null) {
+            $('input[name="denpyo_print_kbn"]').prop('checked', initCheckBox);
           }
           $('#totalSu').val('');
           $('#totalJyuryo').val('');
@@ -1058,7 +1094,7 @@
     $('.error_message').html('');
     $('.group-input').removeClass('error');
     $('.class-show').removeClass('active');
-    $('#formInputs').find('input, select').val('');
+    $('#formInputs').find('input, select').val('').trigger('change');
     $('.btn-insertNew').removeAttr('disabled');
     $('#formInputs .card').css('background', '#FFF');
     $('#totalSu').val('');
@@ -1143,6 +1179,13 @@
             if(hasChangeDataFlg) {
               $.fn.customTable.callbackAfterShow(haschangeDataFunction);
             }
+
+            if (!$('input[name=hatuti_cd]').val()) {
+              $('input[name=hatuti_nm]').val(res.data.ninusi_ryaku_nm);
+              $('input[name=hatuti_jyusyo1]').val(res.data.jyusyo1_nm);
+              $('input[name=hatuti_jyusyo2]').val(res.data.jyusyo2_nm);
+              $('input[name=hatuti_tel]').val(res.data.tel);
+            }
           }
         }
       })
@@ -1164,6 +1207,8 @@
 
   $('#showNyusyukoHead').click(function() {
     var iframe = $('.modal-head iframe')[0];
+    var hedNyusyukoKbn = $('[name="hed_nyusyuko_kbn"]').val();
+    iframe.contentWindow.postMessage({data_nyusyuko_kbn: hedNyusyukoKbn}, '*');
     iframe.contentWindow.postMessage('research', '*');
     $('.modal-head').addClass('active');
     $('html').addClass('hideScroll');
@@ -1273,13 +1318,22 @@
       success: function(res) {
         if(res.status == 200) {
           if(res.data.nyusyuko_den_no) {
-            $('input[name="hed_nyusyuko_den_no"]').val(res.data.nyusyuko_den_no);
+            // $('input[name="hed_nyusyuko_den_no"]').val(res.data.nyusyuko_den_no);
             Swal.fire({
               'title': res.message || '',
               'icon': 'success',
             });
             $('.error_message').html('');
-            $('.btn-search').click();
+            // $('.btn-search').click();
+            var dataTable = $('#table').bootstrapTable('getData');
+            dataTable = [];
+            $('#table').bootstrapTable('refresh');
+            if($('input[name="denpyo_print_kbn"]').is(':checked')) {
+              initCheckBox = true;
+            } else {
+              initCheckBox = false;
+            }
+
             if($('[name="hed_nyusyuko_kbn"]').val() == 1 || $('[name="hed_nyusyuko_kbn"]').val() == 2) {
               if($('input[name="denpyo_print_kbn"]').is(':checked')) {
                 var form = $('<form>', {
@@ -1360,7 +1414,7 @@
     })
   }
   function openModal(value, row, index) {
-    return '<button type="button" class="btn btn-secondary" onclick="openModalZaikoNyusyukoMeisai(this, '+index+')">在庫選択</button>'
+    return '<button type="button" tabindex="-1" class="btn btn-secondary" onclick="openModalZaikoNyusyukoMeisai(this, '+index+')">在庫選択</button>'
   }
 
   function openModalZaikoNyusyukoMeisai(e, index) {
@@ -1417,7 +1471,7 @@
 
   function formatterCaseSu(value, row, index) {
     var irisu = row.irisu || 0;
-    var readonly = "readonly";
+    var readonly = 'readonly tabindex="-1"';
     if(irisu > 0) {
       readonly = "";
     }
@@ -1426,7 +1480,7 @@
 
   function formatterHasu(value, row, index) {
     var irisu = row.irisu || 0;
-    var readonly = "readonly";
+    var readonly = 'readonly tabindex="-1"';
     if(irisu > 0) {
       readonly = "";
     }
@@ -1434,7 +1488,7 @@
   }
 
   function formatterIrisu(value, row, index) {
-    return '<input readonly onchange="onchangeIrisu(this)" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="irisu" value="'+numberFormat(value || '', -1)+'" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"><div class="error error-irisu"><span class="text-danger"></span></div>';
+    return '<input readonly onchange="onchangeIrisu(this)" tabindex="-1" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="irisu" value="'+numberFormat(value || '', -1)+'" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"><div class="error error-irisu"><span class="text-danger"></span></div>';
   }
 
   function formatterSu(value, row, index) {
@@ -1445,7 +1499,7 @@
   }
 
   function formatKikaku(value, row, index) {
-    return '<input name="kikaku" type="text" class="form-control" readonly onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" value="'+value+'"/>'
+    return '<input name="kikaku" type="text" class="form-control" tabindex="-1" readonly onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" value="'+(value || '')+'"/>'
   }
 
   function calculatorJyuryuo(e) {
@@ -1474,6 +1528,14 @@
       var hasu = su % irisu;
       $(e).parents('tr').find('[name="hasu"]').val(numberFormat(hasu, -1));
       $(e).parents('tr').find('[name="case_su"]').val(numberFormat(caseSu, -1));
+      if($(e).parents('tbody').length > 0 ) {
+        $(e).parents('tr').find('[name="hasu"]').addClass('hasChangeValue');
+        $(e).parents('tr').find('[name="case_su"]').addClass('hasChangeValue');
+        var row = $('#table').bootstrapTable('getData')[$(e).parents('tr').index()];
+        row.su = su;
+        row.hasu = hasu;
+        row.case_su = caseSu;
+      }
     }
 
     var totalSu = 0;
@@ -1491,8 +1553,8 @@
     irisu = parseFloat(irisu.replace(/,/g, '')) || 0;
 
     if(irisu > 0) {
-      $(e).parents('tr').find('[name="case_su"]').removeAttr('readonly');
-      $(e).parents('tr').find('[name="hasu"]').removeAttr('readonly');
+      $(e).parents('tr').find('[name="case_su"]').removeAttr('readonly').removeAttr('tabindex');
+      $(e).parents('tr').find('[name="hasu"]').removeAttr('readonly').removeAttr('tabindex');
     } else {
       $(e).parents('tr').find('[name="case_su"]').val('').attr('readonly');
       $(e).parents('tr').find('[name="hasu"]').val('').attr('readonly');
@@ -1501,15 +1563,15 @@
 
   function formatterFooter(column, index) {
     if(column.field == 'irisu') {
-      return '<td><input readonly onchange="onchangeIrisu(this)" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="irisu" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>';
+      return '<td><input readonly onchange="onchangeIrisu(this)" tabindex="-1" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="irisu" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>';
     }
 
     if(column.field == 'case_su') {
-      return '<td><input onchange="calculator(this)" readonly onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="case_su" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>'
+      return '<td><input onchange="calculator(this)" readonly tabindex="-1" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="case_su" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>'
     }
 
     if(column.field == 'hasu') {
-      return '<td><input onchange="calculator(this)" readonly onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="hasu" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>';
+      return '<td><input onchange="calculator(this)" readonly tabindex="-1" onkeypress="onlyNumber(event)" type="text" maxlength="undefined" class="form-control text-right" name="hasu" value="" onblur="setCellFocusStatus($(this), false), formatNumberOnBlur(this)" onfocus="setCellFocusStatus($(this), true), removeFormatOnFocus(this)"></td>';
     }
 
     if(column.field == 'su') {
@@ -1525,7 +1587,11 @@
     }
 
     if(column.field == 'kikaku') {
-      return '<td><div class="div-row" data-field="kikaku"><input type="text" class="form-control" name="kikaku" readonly onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" /></div><div class="error error-kikaku"><span class="text-danger"></span></div></div></td>';
+      return '<td><div class="div-row" data-field="kikaku"><input tabindex="-1" type="text" class="form-control" name="kikaku" readonly onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" /></div><div class="error error-kikaku"><span class="text-danger"></span></div></div></td>';
+    }
+
+    if(column.field == 'biko') {
+      return '<td><input type="text" class="form-control" onblur="setCellFocusStatus($(this), false), onKeyupBiko(this, event)" onfocus="setCellFocusStatus($(this), true), focusBiko(this)" name="biko" data-key="column_15" placeholder="備考" ><div class="error error-biko"><span class="text-danger"></span></div></td>';
     }
   }
   function calculator(e) {
@@ -1536,7 +1602,15 @@
     hasuRow = parseFloat(hasuRow.replace(/,/g, '')) || 0;
     irisu = parseFloat(irisu.replace(/,/g, '')) || 0;
     var total = caseSuRow * irisu + hasuRow;
-    $(e).parents('tr').find('[name="su"]').val(numberFormat(total, -1)).trigger('change').trigger('blur');
+    $(e).parents('tr').find('[name="su"]').val(numberFormat(total, -1));
+
+    if($(e).parents('tbody').length > 0) {
+      $(e).parents('tr').find('[name="su"]').val(numberFormat(total, -1)).addClass('hasChangeValue');
+      var row = $('#table').bootstrapTable('getData')[$(e).parents('tr').index()];
+      row.su = total;
+      row.hasu = hasuRow;
+      row.case_su = caseSuRow;
+    }
   }
 
   function calculatorRoundKintax(e) {
@@ -1594,11 +1668,61 @@
       }
     }
   }
+
+  function onblurDenpyoDt(e)
+  {
+    var val = null;
+
+    if ($(e).val()) {
+      val = $(e).val();
+    } else {
+      val = currentDateSystem;
+    }
+
+    $('input[name=kisan_dt], input[name=denpyo_dt]').val(val);
+  }
+  var tabbiko = false;
+  var focusbiko = false;
+  $(document).keydown(function(e) {
+    if(e.keyCode == 9) {
+      tabbiko = true;
+    }
+  })
+
+  function focusBiko(e) {
+    focusbiko = true;
+  }
+
+  function onKeyupBiko(e) {
+    if(tabbiko == true && focusbiko == true) {
+      if ($('#table tbody tr').not('.no-records-found').length > 0 ) {
+        $('#table tbody tr:first-child').find('[name="hinmei_cd"]').focus();
+      } else {
+        $('#table tfoot tr:first-child').find('[name="hinmei_cd"]').focus();
+      }
+    }
+    tabbiko = false;
+    focusbiko = false;
+  }
+
+  function keyupBumon(e, event) {
+    if(event.keyCode == 13) {
+      $('[name="hed_nyusyuko_kbn"]').parent().find('.select2-selection.select2-selection--single').focus();
+    }
+  }
+
   $(document).ready(function() {
     $('.formConfirmChange').find('select, input').change(function() {
       hasChangeData = true;
       hasChangeDataFlg = true;
     });
+
+    $('select[name="hed_nyusyuko_kbn"]').select2({minimumResultsForSearch: -1});
+    
+  });
+
+  $(document).on('focus', '.select2-selection.select2-selection--single', function (e) {
+    $(this).closest(".select2-container").siblings('select:enabled').select2('open');
   });
 </script>
 @endsection

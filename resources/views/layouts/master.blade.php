@@ -15,7 +15,7 @@
   <link href="{{ asset('assets/css/bootstrap-table.min.css') }}" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/css/jquery-ui.css') }}">
   <link rel="stylesheet" href="{{asset('assets/css/style.css')}}">
-
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/jquery.resizableColumns.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom_page.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/jspreadsheet.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/jsuites.css') }}">
@@ -59,6 +59,7 @@
             </li>
           <li class="nav-item nav-profile dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+              <b class="mr-1">{{ auth()->user()->user_cd }}</b>
               <img class="bg-primary" src="{{asset('assets/images/faces/user-128.svg')}}" alt="profile"/>
             </a>
             <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
@@ -120,6 +121,7 @@
 {{--  <script src="{{asset('assets/js/todolist.js')}}"></script>--}}
   <!-- endinject -->
   <script src="{{ asset('assets/js/bootstrap-table.min.js') }}"></script>
+  <script src="{{ asset('assets/js/colResizable-1.6.js') }}"></script>
   <script src="{{ asset('assets/js/jquery-ui.min.js') }}"></script>
   <script src="{{ asset('assets/js/jquery.ui.datepicker-ja.js') }}"></script>
   <!-- End custom js for this page-->

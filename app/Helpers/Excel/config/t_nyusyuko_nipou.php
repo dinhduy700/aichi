@@ -1,10 +1,5 @@
 <?php
 $exp = new \App\Helpers\Excel\XlsNyusyukoNipou();
-$valCaseHasu = function ($row, $caseField, $hasuField) {
-    if ($row->$caseField===null && $row->$hasuField===null) return '';
-    return \App\Helpers\Formatter::number($row->$caseField) . "/"
-        . \App\Helpers\Formatter::number($row->$hasuField);
-};
 return [
     'base' => [
         'template' => [

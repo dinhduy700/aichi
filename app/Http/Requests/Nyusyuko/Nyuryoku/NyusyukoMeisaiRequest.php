@@ -100,7 +100,6 @@ class NyusyukoMeisaiRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->addExtension('hinmei_exists', function($attribute, $value, $parameters, $validator) {
-            return true;
             $exists = DB::table('m_soko_hinmei')->where('hinmei_cd', $value)->exists();
             return $exists;
         });

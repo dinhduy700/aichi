@@ -26,7 +26,7 @@ return [
                     return $list->sum('hasu');
                 }],
                 ['col' => 'I', 'row' => 2, 'value' => function($list) {
-                    return $list->sum('su');
+                    return $list->sum('sousu');
                 }],
             ],
         ],

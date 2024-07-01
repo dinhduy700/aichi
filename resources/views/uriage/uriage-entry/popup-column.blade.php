@@ -27,10 +27,10 @@
     </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">
-      <input type="checkbox" class="form-check-input" name="hatuti_cd" value="1" onclick="initColumnCheckHidden(this, ['hatuti_nm'])">発地CD/発地名
+      <input type="checkbox" class="form-check-input" name="hatuti_cd" value="1" onclick="initColumnCheckHidden(this, ['hatuti_hachaku_nm'])">発地CD/発地名
       <i class="input-helper"></i>
       </label>
-      <input type="hidden" class="form-check-input" name="hatuti_nm" value="1">
+      <input type="hidden" class="form-check-input" name="hatuti_hachaku_nm" value="1">
     </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">

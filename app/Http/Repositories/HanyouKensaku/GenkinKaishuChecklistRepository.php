@@ -13,7 +13,8 @@ class GenkinKaishuChecklistRepository
             DB::raw('null as field_no1'),
             DB::raw('\'売上\' as field_no2'),
             DB::raw('m_meisyo_gyosya.meisyo_nm as gyosya_nm'),
-            'm_hachaku.hachaku_nm',
+            // 'm_hachaku.hachaku_nm',
+            't_uriage.hachaku_nm',
             DB::raw('COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tyukei_kin, 0) + COALESCE(t_uriage.tukoryo_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0) as field_no6'),
             'm_jyomuin.jyomuin_nm',
             't_uriage.haitatu_dt'

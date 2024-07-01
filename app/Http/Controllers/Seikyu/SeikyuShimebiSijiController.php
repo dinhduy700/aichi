@@ -13,6 +13,7 @@ use App\Helpers\Formatter;
 use App\Models\MBumon;
 use App\Http\Repositories\Seikyu\SeikyuShimebiSijiRepository;
 use App\Http\Requests\Seikyu\SeikyuShimebiSijiRequest;
+use App\Models\MNinusi;
 
 class SeikyuShimebiSijiController extends Controller
 {
@@ -108,12 +109,12 @@ class SeikyuShimebiSijiController extends Controller
     {   
         try {
             DB::beginTransaction();
-
-            // sheet 締更新
-            $this->handleSeikyu($request->bumons, $seikyuSimeDt);
         
             // sheet データマッピングシート(ECT) (2)
             $this->insertTZaikoHokanryo($seikyuSimeDt);
+
+            // sheet 締更新
+            $this->handleSeikyu($request->bumons, $seikyuSimeDt);
 
             DB::commit();
 
@@ -137,7 +138,18 @@ class SeikyuShimebiSijiController extends Controller
             $repo           = $this->seikyuShimebisijiRepository;
             $i              = 0;
             $seikyuSimeDt   = Formatter::date($seikyuSimeDt);
+            $arrDataListUriageJoinNinusi = [];
             
+            // 0. Get data t_zaiko_hokanryo
+            $qbNiyakuryoKin = $repo->listNiyakuryoKin($bumons, $seikyuSimeDt);
+
+            $listNiyakuryoKin = $qbNiyakuryoKin->pluck('niyakuryo_kin', 'ninusi_cd');
+
+            foreach ($listNiyakuryoKin as $ninusiCd => $value) {
+                $arrDataListUriageJoinNinusi[$ninusiCd] = $value;
+            }
+            
+            // 1.
             $qbListUriageJoinNinusi = $repo->listUriageJoinNinusi($bumons, $seikyuSimeDt);
             
             if ($qbListUriageJoinNinusi->count() == 0) {
@@ -148,7 +160,11 @@ class SeikyuShimebiSijiController extends Controller
                 ];
             }
            
-            $dataListUriageJoinNinusi = $qbListUriageJoinNinusi->get();
+            $dataListUriageJoinNinusi = $qbListUriageJoinNinusi->get()->keyBy('ninusi_cd');
+
+            foreach ($dataListUriageJoinNinusi as $ninusiCd => $record) {
+                $arrDataListUriageJoinNinusi[$ninusiCd] = $record;
+            }
 
             // prepare data insert t_seikyu
             $qbListUriageJoinNinusiNoGroupBy = $repo->listUriageJoinNinusiNoGroupBy($bumons, $seikyuSimeDt);
@@ -163,7 +179,7 @@ class SeikyuShimebiSijiController extends Controller
             
             $groupedListUriageJoinNinusiNoGroupBy = $qbListUriageJoinNinusiNoGroupBy->get()->groupBy('ninusi_cd');
 
-            $arrTmpByMenzeiKbn = $this->caclByMenzeiKbn($groupedListUriageJoinNinusiNoGroupBy);
+            $arrTmpByMenzeiKbn = $this->caclByMenzeiKbn($groupedListUriageJoinNinusiNoGroupBy, $listNiyakuryoKin);
             
             // get data_t_nyukin
             $qbNyukin = $repo->listNyukin($seikyuSimeDt);
@@ -174,9 +190,9 @@ class SeikyuShimebiSijiController extends Controller
            
             // get uriage_den_no
             $collectionUriage   = $dataListUriageJoinNinusi->keyBy('ninusi_cd');
-            $listUriageDenNo    = $repo->listUriageDenNo($collectionUriage, $seikyuSimeDt);
-           
-            foreach ($dataListUriageJoinNinusi as $key => $item) {
+            $listUriageDenNo    = $repo->listUriageDenNo($bumons, $seikyuSimeDt);
+            
+            foreach ($arrDataListUriageJoinNinusi as $ninusiCd => $item) {
                 $i                      += 1;
                 $sumGenkinKin           = 0;
                 $sumFurikomiKin         = 0;
@@ -194,12 +210,8 @@ class SeikyuShimebiSijiController extends Controller
                 $kazeiTukouryouKin      = 0;
                 $kazeiNiyakuryoKin      = 0;
                 $zeiKin                 = 0;
-                $ninusiCd               = $item->ninusi_cd;
                 $qbSeikyu               = $repo->getListSeikyu($ninusiCd, $seikyuSimeDt);
-                $zeiHasuKbn             = (int) $item->zei_hasu_kbn;
-                $zeiHasuTani            = (int) $item->zei_hasu_tani;
-                $kinHasuKbn             = (int) $item->kin_hasu_kbn;
-                $kinHasuTani            = (int) $item->kin_hasu_tani;
+                $seikyuNo               = Formatter::datetime($seikyuSimeDt, 'Ymd') . sprintf("%03d", $i);
 
                 if ($collectionNyukin->has($ninusiCd)) {
                     $nyuKinWhereNinusiCd    = $collectionNyukin->get($ninusiCd);
@@ -210,10 +222,25 @@ class SeikyuShimebiSijiController extends Controller
                     $sumSousaiKin           = $nyuKinWhereNinusiCd->sum__sousai_kin;
                     $sumNebikiKin           = $nyuKinWhereNinusiCd->sum__nebiki_kin;
                     $sumSonotaNyuKin        = $nyuKinWhereNinusiCd->sum__sonota_nyu_kin;
-                } 
+                }
+
+                $konkaiTorihikiKin = $repo->getKonkaiTorihikiKin($ninusiCd, $seikyuSimeDt);
+
+                if (is_object($item)) {
+                    $zeiHasuKbn     = (int) $item->zei_hasu_kbn;
+                    $zeiHasuTani    = (int) $item->zei_hasu_tani;
+                    $kinHasuKbn     = (int) $item->kin_hasu_kbn;
+                    $kinHasuTani    = (int) $item->kin_hasu_tani;
+                } else {
+                    $kinHasuKbn     = 2;
+                    $kinHasuTani    = 0;
+                    $zeiHasuKbn     = 2;
+                    $zeiHasuTani    = 0;
+                }
 
                 if (collect($arrTmpByMenzeiKbn)->has($ninusiCd)) {
                     $dataByMenzeiKbnFromNinusiCd    = collect($arrTmpByMenzeiKbn)->get($ninusiCd);
+                    
                     $hikazeiUnchinKin               = data_get($dataByMenzeiKbnFromNinusiCd, 'hikazei_unchin_kin', 0);
                     $hikazeiTyukeiKin               = data_get($dataByMenzeiKbnFromNinusiCd, 'hikazei_tyukei_kin', 0);
                     $hikazeiTukouryoKin             = data_get($dataByMenzeiKbnFromNinusiCd, 'hikazei_tukouryo_kin', 0);
@@ -225,10 +252,8 @@ class SeikyuShimebiSijiController extends Controller
                     $zeiKin                         = roundFromKbnTani(data_get($dataByMenzeiKbnFromNinusiCd, 'zei_kin', 0), $zeiHasuKbn, $zeiHasuTani) ;
                 }
 
-                $konkaiTorihikiKin = $repo->getKonkaiTorihikiKin($ninusiCd, $seikyuSimeDt);
-                
                 $values = [
-                    'seikyu_no'             => Formatter::datetime($seikyuSimeDt, 'Ymd') . sprintf("%03d", $i),
+                    'seikyu_no'             => $seikyuNo,
                     'zenkai_seikyu_kin'     => $konkaiTorihikiKin,
                     'genkin_kin'            => $sumGenkinKin,
                     'furikomi_kin'          => $sumFurikomiKin,
@@ -257,7 +282,7 @@ class SeikyuShimebiSijiController extends Controller
                     'upd_user_cd'           => Auth::id(),
                     'upd_dt'                => now(),
                 ];
-                
+
                 if (!$qbSeikyu->exists()) {
                     //3.1.1
                     $repo->insertTSeikyu([
@@ -277,19 +302,19 @@ class SeikyuShimebiSijiController extends Controller
                         'seikyu_sime_dt'    => $seikyuSimeDt,
                     ];
 
-                    $valuesUpdate = [
-                        'seikyu_no'    => $seikyuNo,
-                        'upd_user_cd'  => Auth::id(),
-                        'upd_dt'       => now(),
-                    ];
-
                     $repo->emptySeikyuNo('t_uriage', $seikyuNo);
 
                     $repo->updateTSeikyu($where, $values);
-
-                    // 3.3. Update data t_uriage
-                    $repo->updateTUriage($where, $listUriageDenNo, $valuesUpdate);
                 }
+
+                // 3.2. Update data t_uriage
+                $valuesUpdate = [
+                    'seikyu_no'    => $seikyuNo,
+                    'upd_user_cd'  => Auth::id(),
+                    'upd_dt'       => now(),
+                ];
+                
+                $repo->updateTUriage($ninusiCd, $seikyuSimeDt, $listUriageDenNo, $valuesUpdate);
             }
         } catch (Exception $e) {
             \Log::info(print_r($e->getMessage(), TRUE) );
@@ -419,6 +444,7 @@ class SeikyuShimebiSijiController extends Controller
             $ki1KurikosiSu  = data_get($item, 'sum__zaiko_all_su', 0) ?? 0;
             $ki2KurikosiSu  = $ki1KurikosiSu + $sumSuKi1Kbn1 - $sumSuKi1Kbn2;
             $ki3KurikosiSu  = $ki2KurikosiSu + $sumSuKi2Kbn1 - $sumSuKi2Kbn2;
+
             $touzanSu       = 0;
 
             switch ($kiseiKbn) {
@@ -442,7 +468,7 @@ class SeikyuShimebiSijiController extends Controller
                     break;
             }
             
-            $sekiSu         = $ki1KurikosiSu + $ki2KurikosiSu + $ki3KurikosiSu;
+            $sekiSu        = $ki1KurikosiSu + $sumSuKi1Kbn1 + $ki2KurikosiSu +  $sumSuKi2Kbn1 + $ki3KurikosiSu + $sumSuKi3Kbn1;
 
             $hokanKin      = $sekiSu * $hokanTanka;
             $nyukoSu       = $sumSuKi1Kbn1 + $sumSuKi2Kbn1 + $sumSuKi3Kbn1;
@@ -522,23 +548,56 @@ class SeikyuShimebiSijiController extends Controller
     {
         $repo                       = $this->seikyuShimebisijiRepository;
         $dataInsert                 = [];
-        $listSumSuInsZaikoKijyun    = $repo->getSumSuInsZaikoKijyun($ninusiCds, $seikyuSimeDt)->get();
+        $i                          = 0;
 
-        foreach ($listSumSuInsZaikoKijyun as $i => $item) {
-            data_set($dataInsert[$i], 'kijyun_dt', $seikyuSimeDt);
-            data_set($dataInsert[$i], 'bumon_cd', data_get($item, 'bumon_cd'));
-            data_set($dataInsert[$i], 'ninusi_cd', data_get($item, 'ninusi_cd'));
-            data_set($dataInsert[$i], 'hinmei_cd', data_get($item, 'hinmei_cd'));
-            data_set($dataInsert[$i], 'location', data_get($item, 'location') ?? '');
-            data_set($dataInsert[$i], 'case_su', data_get($item, 'case_su') ?? 0);
-            data_set($dataInsert[$i], 'hasu_su', data_get($item, 'hasu_su') ?? 0);
-            data_set($dataInsert[$i], 'zaiko_all_su', data_get($item, 'sum_su__kbn_1', 0) - data_get($item, 'sum_su__kbn_2', 0) 
-                                                    + data_get($item, 'sum_su__kbn_4', 0) + data_get($item, 'sum_su__kbn_5', 0));
+        // 5.1. Get data t_zaiko
+        $listTZaiko         = $repo->getSumSuTZaiko($ninusiCds)->get();
 
-            data_set($dataInsert[$i], 'add_user_cd', Auth::id());
-            data_set($dataInsert[$i], 'add_dt', Carbon::now());
-            data_set($dataInsert[$i], 'upd_user_cd', Auth::id());
-            data_set($dataInsert[$i], 'upd_dt', Carbon::now());
+        $listTZaikoGroupBy  = $listTZaiko->groupBy(function ($item, $key){
+            $colsGroupBy = [
+                $item->bumon_cd,
+                $item->ninusi_cd,
+                $item->hinmei_cd,
+                $item->location,
+            ];
+          
+            return implode('__', $colsGroupBy);
+        });
+
+        // 5.2. Get data t_nyusyuko_head & meisai
+        $listSumSuInsZaikoKijyun        = $repo->getSumSuInsZaikoKijyun($ninusiCds, $seikyuSimeDt)->get();
+
+        $listSumSuInsZaikoKijyunGroupBy = $listSumSuInsZaikoKijyun->groupBy(function ($item, $key){
+            $colsGroupBy = [
+                $item->bumon_cd,
+                $item->ninusi_cd,
+                $item->hinmei_cd,
+                $item->location,
+            ];
+          
+            return implode('__', $colsGroupBy);
+        });
+        
+        foreach ($listTZaikoGroupBy as $k => $item) {
+            if ($listSumSuInsZaikoKijyunGroupBy->has($k)) {
+                $recordSumSuInsZaikoKijyun = data_get($listSumSuInsZaikoKijyunGroupBy, $k)->first();
+
+                data_set($dataInsert[$i], 'kijyun_dt', $seikyuSimeDt);
+                data_set($dataInsert[$i], 'bumon_cd', data_get($recordSumSuInsZaikoKijyun, 'bumon_cd'));
+                data_set($dataInsert[$i], 'ninusi_cd', data_get($recordSumSuInsZaikoKijyun, 'ninusi_cd'));
+                data_set($dataInsert[$i], 'hinmei_cd', data_get($recordSumSuInsZaikoKijyun, 'hinmei_cd'));
+                data_set($dataInsert[$i], 'location', data_get($recordSumSuInsZaikoKijyun, 'location') ?? '');
+                data_set($dataInsert[$i], 'case_su', data_get($recordSumSuInsZaikoKijyun, 'case_su') ?? 0);
+                data_set($dataInsert[$i], 'hasu_su', data_get($recordSumSuInsZaikoKijyun, 'hasu_su') ?? 0);
+                data_set($dataInsert[$i], 'zaiko_all_su', (data_get($item->first(), 'sum__su') ?? 0) - (data_get($recordSumSuInsZaikoKijyun, 'zaiko_all_su__tmp') ?? 0) );
+    
+                data_set($dataInsert[$i], 'add_user_cd', Auth::id());
+                data_set($dataInsert[$i], 'add_dt', Carbon::now());
+                data_set($dataInsert[$i], 'upd_user_cd', Auth::id());
+                data_set($dataInsert[$i], 'upd_dt', Carbon::now());
+
+                $i++;
+            }
         }
 
         $kijyunDts      = collect($dataInsert)->pluck('kijyun_dt');
@@ -614,24 +673,41 @@ class SeikyuShimebiSijiController extends Controller
         ];
     }
 
-    private function caclByMenzeiKbn($grouped) 
+    private function caclByMenzeiKbn($grouped, $listNiyakuryoKin) 
     {
         $arrTmpByMenzeiKbn = [];
         $arrTmpZeiKeisanKbn = [];
+        $dataGrouped = [];
+
+        foreach ($listNiyakuryoKin as $ninusiCd => $value) {
+            $dataGrouped[$ninusiCd] = $value;
+        }
 
         foreach ($grouped as $ninusiCd => $items) {
+            $dataGrouped[$ninusiCd] = $items;
+        }
+
+        foreach ($dataGrouped as $ninusiCd => $items) {
+            if (!is_object($items)) {
+                $dataGrouped[$ninusiCd] = MNinusi::where('ninusi_cd', $ninusiCd)->get();
+            }
+        }
+
+        foreach ($dataGrouped as $ninusiCd => $items) {
             foreach ($items as $item) {
-                
                 $zeiHasuKbn = (int) $item->zei_hasu_kbn;
                 $zeiHasuTani = (int) $item->zei_hasu_tani;
+                $sumKazeiNiyakuryoKin = 0;
+                $sumHikazeiNiyakuryoKin = 0;
 
                 switch (data_get($item, 'menzei_kbn')) {
                     case 0:
+                    case null:
                         //kazei_unchin_kin
                         if (isset($arrTmpByMenzeiKbn[$ninusiCd]['kazei_unchin_kin'])) {
-                            $sumKazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + data_get($item, 'tesuryo_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['kazei_unchin_kin'];
+                            $sumKazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['kazei_unchin_kin'];
                         } else {
-                            $sumKazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + data_get($item, 'tesuryo_kin', 0);
+                            $sumKazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0);
                         }
                         data_set($arrTmpByMenzeiKbn[$ninusiCd], 'kazei_unchin_kin', $sumKazeiUnchinKin);
                         
@@ -653,13 +729,11 @@ class SeikyuShimebiSijiController extends Controller
                         data_set($arrTmpByMenzeiKbn[$ninusiCd], 'kazei_tukouryou_kin', $sumKazeiTukouryoKin);
 
                         //kazei_niyakuryo_kin
-                        if (isset($arrTmpByMenzeiKbn[$ninusiCd]['kazei_niyakuryo_kin'])) {
-                            $sumKazeiNiyakuryoKin = data_get($item, 'nieki_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['kazei_niyakuryo_kin'];
-                        } else {
-                            $sumKazeiNiyakuryoKin = data_get($item, 'nieki_kin', 0);
+                        if ($listNiyakuryoKin->has($ninusiCd)) {
+                            $sumKazeiNiyakuryoKin = data_get($listNiyakuryoKin, $ninusiCd);
+                            data_set($arrTmpByMenzeiKbn[$ninusiCd], 'kazei_niyakuryo_kin', $sumKazeiNiyakuryoKin);
                         }
-                        data_set($arrTmpByMenzeiKbn[$ninusiCd], 'kazei_niyakuryo_kin', $sumKazeiNiyakuryoKin);
-
+                        
                         //zei_kin
                         switch (data_get($item, 'zei_keisan_kbn')) {
                             case 1:
@@ -709,9 +783,9 @@ class SeikyuShimebiSijiController extends Controller
                     case 1:
                         //hikazei_unchin_kin
                         if (isset($arrTmpByMenzeiKbn[$ninusiCd]['hikazei_unchin_kin'])) {
-                            $sumHikazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + data_get($item, 'tesuryo_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['hikazei_unchin_kin'];
+                            $sumHikazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['hikazei_unchin_kin'];
                         } else {
-                            $sumHikazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0) + data_get($item, 'tesuryo_kin', 0);
+                            $sumHikazeiUnchinKin = data_get($item, 'unchin_kin', 0) + data_get($item, 'syuka_kin', 0);
                         }
                         data_set($arrTmpByMenzeiKbn[$ninusiCd], 'hikazei_unchin_kin', $sumHikazeiUnchinKin);
 
@@ -732,11 +806,6 @@ class SeikyuShimebiSijiController extends Controller
                         data_set($arrTmpByMenzeiKbn[$ninusiCd], 'hikazei_tukouryo_kin', $sumHikazeiTukouryoKin);
 
                         //hikazei_niyakuryo_kin
-                        if (isset($arrTmpByMenzeiKbn[$ninusiCd]['hikazei_niyakuryo_kin'])) {
-                            $sumHikazeiNiyakuryoKin = data_get($item, 'nieki_kin', 0) + $arrTmpByMenzeiKbn[$ninusiCd]['hikazei_niyakuryo_kin'];
-                        } else {
-                            $sumHikazeiNiyakuryoKin = data_get($item, 'nieki_kin', 0);
-                        }
                         data_set($arrTmpByMenzeiKbn[$ninusiCd], 'hikazei_niyakuryo_kin', $sumHikazeiNiyakuryoKin);
                         break;
                 }

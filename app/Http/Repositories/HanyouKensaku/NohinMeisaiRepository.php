@@ -13,8 +13,10 @@ class NohinMeisaiRepository
     public function getListWithTotalCount($request)
     {
         $qb = TUriage::query()->select('t_uriage.*');
-        $qb->joinMHachaku()->addSelect('m_hachaku.hachaku_nm');
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['hinmoku_nm', 'hinmei_nm']);
+        // $qb->joinMHachaku()->addSelect('m_hachaku.hachaku_nm');
+        $qb->joinMHachaku();
+        // $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['hinmoku_nm', 'hinmei_nm']);
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(['hinmoku_nm']);
         $qb->joinMMeisyoSyubetu()->addSelect('m_meisyo_syubetu.meisyo_nm AS syubetu_nm');
         $qb->leftJoinSub(
             MNinusi::query()->select(['ninusi_cd', DB::raw("COALESCE(seikyu_cd, ninusi_cd) AS seikyu_cd")])->distinct(),

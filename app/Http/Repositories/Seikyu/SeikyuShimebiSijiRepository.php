@@ -43,6 +43,20 @@ class SeikyuShimebiSijiRepository
         return $qb;
     }
 
+    public function listNiyakuryoKin($bumons, $seikyuSimeDt)
+    {
+        $qb = DB::table('t_zaiko_hokanryo')
+                ->select([
+                    't_zaiko_hokanryo.ninusi_cd',
+                    DB::raw('COALESCE(sum(hokan_kin), 0) + COALESCE(sum(nyuko_kin), 0) + COALESCE(sum(syuko_kin), 0) as niyakuryo_kin'),
+                ])
+                ->whereIn('t_zaiko_hokanryo.bumon_cd', $bumons)
+                ->where('seikyu_sime_dt', $seikyuSimeDt)
+                ->groupBy('t_zaiko_hokanryo.ninusi_cd');
+        
+        return $qb;
+    }
+
     public function listUriageJoinNinusi($bumons, $seikyuSimeDt)
     {   
         $qb = new TUriage();// $qb = new Builder();
@@ -165,16 +179,21 @@ class SeikyuShimebiSijiRepository
         return $res;
     }
 
-    public function listUriageDenNo($collection, $seikyuSimeDt)
+    public function listUriageDenNo($bumons, $seikyuSimeDt)
     {
-        $ninusiCds = $collection->keys()->toArray();
+        $tUriage =  new TUriage();// $qb = new Builder();
+        $qb = $tUriage->joinMNinusi('inner');
+        
+        $qb->join("m_ninusi as N2", DB::raw('COALESCE(m_ninusi.seikyu_cd, m_ninusi.ninusi_cd)'), "=", "N2.ninusi_cd");
 
-        $qbUriage = DB::table('t_uriage')
-                        ->whereIn('ninusi_cd', $ninusiCds)
-                        ->where('seikyu_sime_dt', $seikyuSimeDt);
+        $qb = $this->whereListUriageJoinNinusi($qb, $bumons, $seikyuSimeDt);
 
-        $res = $qbUriage->get()->pluck('uriage_den_no')->toArray();
+        $qb->addSelect([
+            't_uriage.uriage_den_no',
+        ]);
 
+        $res = $qb->get()->pluck('uriage_den_no')->toArray();
+       
         return $res;
     }
     
@@ -286,6 +305,25 @@ class SeikyuShimebiSijiRepository
         return $qb;
     }
 
+    public function getSumSuTZaiko($ninusiCds)
+    {
+        $groupBy = [
+                    't_zaiko.bumon_cd',
+                    't_zaiko.ninusi_cd',
+                    't_zaiko.hinmei_cd',
+                    't_zaiko.location',
+        ];
+        
+        $qb = DB::table('t_zaiko')
+            ->select($groupBy)
+            ->selectRaw('sum(su) as sum__su')
+            ->join('m_ninusi', 't_zaiko.ninusi_cd', '=', 'm_ninusi.ninusi_cd')
+            ->whereIn(DB::raw("COALESCE(m_ninusi.seikyu_cd, m_ninusi.ninusi_cd)"), $ninusiCds)
+            ->groupBy($groupBy);
+
+        return $qb;
+    }
+
     public function getSumSuInsZaikoKijyun($ninusiCds, $seikyuSimeDt)
     {
         $qb = DB::table('t_nyusyuko_head')
@@ -294,8 +332,7 @@ class SeikyuShimebiSijiRepository
                 't_nyusyuko_head.ninusi_cd',
                 't_nyusyuko_meisai.hinmei_cd',
                 't_nyusyuko_meisai.location',
-                DB::raw("FLOOR(SUM(su) / m_soko_hinmei.irisu) as case_su"),
-                DB::raw("(SUM(su) % m_soko_hinmei.irisu) as hasu_su"),
+                'm_soko_hinmei.irisu',
                 DB::raw("(SELECT SUM(su) AS sum_su__kbn_1
                             FROM t_nyusyuko_head AS head_1
                             INNER JOIN t_nyusyuko_meisai AS meisai_1 ON head_1.nyusyuko_den_no = meisai_1.nyusyuko_den_no
@@ -304,7 +341,7 @@ class SeikyuShimebiSijiRepository
                             AND meisai_1.hinmei_cd = t_nyusyuko_meisai.hinmei_cd
                             AND (meisai_1.location = t_nyusyuko_meisai.location OR (meisai_1.location IS NULL AND t_nyusyuko_meisai.location IS NULL))
                             AND head_1.nyusyuko_kbn = '1'
-                            AND head_1.denpyo_dt <= '{$seikyuSimeDt}')"),
+                            AND head_1.denpyo_dt > '{$seikyuSimeDt}')"),
 
                 DB::raw("(SELECT SUM(su) AS sum_su__kbn_2
                             FROM t_nyusyuko_head AS head_2
@@ -314,7 +351,7 @@ class SeikyuShimebiSijiRepository
                             AND meisai_2.hinmei_cd = t_nyusyuko_meisai.hinmei_cd
                             AND (meisai_2.location = t_nyusyuko_meisai.location OR (meisai_2.location IS NULL AND t_nyusyuko_meisai.location IS NULL))
                             AND head_2.nyusyuko_kbn = '2'
-                            AND head_2.denpyo_dt <= '{$seikyuSimeDt}')"),
+                            AND head_2.denpyo_dt > '{$seikyuSimeDt}')"),
 
                 DB::raw("(SELECT SUM(su) AS sum_su__kbn_4
                             FROM t_nyusyuko_head AS head_4
@@ -324,7 +361,7 @@ class SeikyuShimebiSijiRepository
                             AND meisai_4.hinmei_cd = t_nyusyuko_meisai.hinmei_cd
                             AND (meisai_4.location = t_nyusyuko_meisai.location OR (meisai_4.location IS NULL AND t_nyusyuko_meisai.location IS NULL))
                             AND head_4.nyusyuko_kbn = '4'
-                            AND head_4.denpyo_dt <= '{$seikyuSimeDt}')"),
+                            AND head_4.denpyo_dt > '{$seikyuSimeDt}')"),
 
                 DB::raw("(SELECT SUM(su) AS sum_su__kbn_5
                             FROM t_nyusyuko_head AS head_5
@@ -334,7 +371,7 @@ class SeikyuShimebiSijiRepository
                             AND meisai_5.hinmei_cd = t_nyusyuko_meisai.hinmei_cd
                             AND (meisai_5.location = t_nyusyuko_meisai.location OR (meisai_5.location IS NULL AND t_nyusyuko_meisai.location IS NULL))
                             AND head_5.nyusyuko_kbn = '5'
-                            AND head_5.denpyo_dt <= '{$seikyuSimeDt}')"),
+                            AND head_5.denpyo_dt > '{$seikyuSimeDt}')"),
             ])
             ->join('t_nyusyuko_meisai', 't_nyusyuko_head.nyusyuko_den_no', '=', 't_nyusyuko_meisai.nyusyuko_den_no')
             ->join('m_ninusi', 't_nyusyuko_head.ninusi_cd', '=', 'm_ninusi.ninusi_cd')
@@ -352,8 +389,32 @@ class SeikyuShimebiSijiRepository
                 't_nyusyuko_meisai.location',
                 'm_soko_hinmei.irisu',
             ]);
-        
-        return $qb;
+            
+
+        $res = new Builder(DB::connection());
+        $res = $res->select([
+                        '*',
+                        DB::raw('
+                            CASE 
+                                WHEN irisu IS NULL OR irisu = 0 THEN 0 
+                                ELSE (COALESCE(sum_su__kbn_1, 0) - COALESCE(sum_su__kbn_2, 0) + COALESCE(sum_su__kbn_4, 0) + COALESCE(sum_su__kbn_5, 0)) / irisu 
+                            END as case_su
+                        '),
+                        DB::raw('
+                            CASE 
+                                WHEN irisu IS NULL OR irisu = 0 THEN 0 
+                                ELSE MOD(
+                                    (COALESCE(sum_su__kbn_1, 0) - COALESCE(sum_su__kbn_2, 0) + COALESCE(sum_su__kbn_4, 0) + COALESCE(sum_su__kbn_5, 0)), 
+                                    irisu
+                                ) 
+                            END as hasu_su
+                        '),
+                        
+                        DB::raw('COALESCE(sum_su__kbn_1,0) - COALESCE(sum_su__kbn_2,0) + COALESCE(sum_su__kbn_4,0) + COALESCE(sum_su__kbn_5,0) as zaiko_all_su__tmp'),
+                    ])
+                    ->fromSub($qb, 't1');
+
+        return $res;
     }
 
     public function getSumZaikoAllSu($ninusiCd, $dateOfPreMonth)
@@ -423,12 +484,18 @@ class SeikyuShimebiSijiRepository
         DB::table('t_seikyu')->where($where)->update($values);
     }
 
-    public function updateTUriage($where, $listUriageDenNo, $values)
+    public function updateTUriage($ninusiCd, $seikyuSimeDt, $listUriageDenNo, $values)
     {
         DB::table('t_uriage')
-                ->where($where)
+                ->where('seikyu_sime_dt', $seikyuSimeDt)
                 ->where('unchin_mikakutei_kbn', '=', 0)
                 ->whereIn('uriage_den_no', $listUriageDenNo)
+                ->whereIn('ninusi_cd', function($query) use ($ninusiCd) {
+                    $query->select('ninusi_cd')
+                          ->from('m_ninusi')
+                          ->where('ninusi_cd', $ninusiCd)
+                          ->orWhere('seikyu_cd', $ninusiCd);
+                })
                 ->update($values);
     }
 

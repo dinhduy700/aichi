@@ -12,9 +12,11 @@ class SeikyuMeisaiRepository
         $qb = TUriage::select(
             't_uriage.haitatu_dt',
             
-            'm_hachaku.hachaku_nm',
+            // 'm_hachaku.hachaku_nm',
+            't_uriage.hachaku_nm',
             'm_hinmoku.hinmoku_nm',
-            'm_hinmei.hinmei_nm',
+            // 'm_hinmei.hinmei_nm',
+            't_uriage.hinmei_nm',
             't_uriage.su',
             DB::raw('m_meisyo_syubetu.meisyo_nm as syubetu_nm'),
             DB::raw('COALESCE(t_uriage.unchin_kin, 0) + COALESCE(t_uriage.tukoryo_kin, 0) + COALESCE(t_uriage.nieki_kin, 0) + COALESCE(t_uriage.syuka_kin, 0) + COALESCE(t_uriage.tesuryo_kin, 0) as field_no7'),

@@ -1,6 +1,6 @@
 <?php 
     return [
-        'haitatu_dt' => '運送日',
+        'unso_dt' => '運送日',
         'field_no2' => '科目',
         'bumon_cd' => '部門コード',
         'bumon_nm' => '部門名',

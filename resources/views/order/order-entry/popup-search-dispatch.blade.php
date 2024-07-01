@@ -228,6 +228,36 @@
     <div class="row row-s" style="">
         <div class="col-2 form-check form-check-flat form-check-primary" style="margin-top: 7px;">
             <label class="form-check-label text-nowrap">
+              <input type="checkbox" class="form-check-input " name="chk[syuka_dt]" value="1">
+              集荷日
+              <i class="input-helper"></i>
+              <i class="input-helper"></i>
+            </label>
+        </div>
+        <div class="col-md-10 group-s-input">
+          <div class="form-group row">
+            <!-- <label for="exampleInputUsername2" class="col-sm-2 col-form-label">集荷日</label> -->
+            <div class="col-sm form-inline">
+              <div>
+                <div class="group-flex">
+                  <input type="text" class="form-control size-L-uni" style="width: 100%" name="syuka_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=syuka_dt_from]'), $('input[name=syuka_dt_to]'), 1)">
+                </div>
+              </div>
+              <span class="px-2"> ～ </span>
+              <div>
+                <div class="group-flex">
+                  <input type="text" class="form-control size-L-uni"  style="width: 100%" name="syuka_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=syuka_dt_from]'), $('input[name=syuka_dt_to]'), 2)">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="error-message-row"></div>
+        </div>
+    </div>
+
+    <div class="row row-s" style="">
+        <div class="col-2 form-check form-check-flat form-check-primary" style="margin-top: 7px;">
+            <label class="form-check-label text-nowrap">
               <input type="checkbox" class="form-check-input" name="chk[haitatu_dt]" value="1">
               配達日
               <i class="input-helper"></i>
@@ -240,13 +270,13 @@
             <div class="col-sm form-inline">
               <div>
                 <div class="group-flex">
-                  <input type="text" class="form-control size-L-uni" name="haitatu_dt_from" style="" onchange="autoFillDate(this)">
+                  <input type="text" class="form-control size-L-uni" name="haitatu_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=haitatu_dt_from]'), $('input[name=haitatu_dt_to]'), 1)">
                 </div>
               </div>
               <span class="px-2"> ～ </span>
               <div>
                 <div class="group-flex">
-                  <input type="text" class="form-control size-L-uni" name="haitatu_dt_to" onchange="autoFillDate(this)">
+                  <input type="text" class="form-control size-L-uni" name="haitatu_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=haitatu_dt_from]'), $('input[name=haitatu_dt_to]'), 2)">
                 </div>
               </div>
             </div>
@@ -481,13 +511,13 @@
             <div class="col-sm form-inline">
               <div>
                 <div class="group-flex">
-                  <input type="text" class="form-control size-L-uni" name="unso_dt_from" style="" onchange="autoFillDate(this)">
+                  <input type="text" class="form-control size-L-uni" name="unso_dt_from" style="" onchange="autoFillDate(this)" onblur="validateDates($('input[name=unso_dt_from]'), $('input[name=unso_dt_to]'), 1)">
                 </div>
               </div>
               <span class="px-2"> ～ </span>
               <div>
                 <div class="group-flex">
-                  <input type="text" class="form-control size-L-uni" name="unso_dt_to" onchange="autoFillDate(this)">
+                  <input type="text" class="form-control size-L-uni" name="unso_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=unso_dt_from]'), $('input[name=unso_dt_to]'), 2)">
                 </div>
               </div>
             </div>

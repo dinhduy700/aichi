@@ -93,7 +93,7 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::post('/update-init-column', [OrderEntryController::class, 'updateInitColumn'])->name('update_init_column');
 
-            Route::post('/validate-uriage-form-search', [UriageEntryController::class, 'valdateFormSearchUriage'])->name('validate_form_search_uriage');
+            Route::post('/validate-uriage-form-search', [OrderEntryController::class, 'valdateFormSearchUriage'])->name('validate_form_search_uriage');
         });
 
 
@@ -296,6 +296,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::post('csv', [SeikyuExportController::class, 'csv'])->name('csv');
                 Route::post('pdf', [SeikyuExportController::class, 'pdf'])->name('pdf');
                 Route::get('preview-pdf', [SeikyuExportController::class, 'previewPdf'])->name('previewPdf');
+                Route::post('download-pdf', [SeikyuExportController::class, 'downloadPdf'])->name('downloadPdf');
                 Route::post('update-t-seikyu', [SeikyuExportController::class, 'updateTSeikyu'])->name('updateTSeikyu');
             });
         });

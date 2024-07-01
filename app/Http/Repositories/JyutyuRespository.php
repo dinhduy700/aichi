@@ -7,20 +7,40 @@ namespace App\Http\Repositories;
 use App\Models\TUriage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class JyutyuRespository
 {
     const EXP_PRINT_OTHER_CSV_HEADER = '1';
     public function getExportInjiGroupOpts()
     {
+        $dateFrom   = Carbon::parse(request('exp.dt_from'));
+        $dateTo     = Carbon::parse(request('exp.dt_to'));
+
         return [
             'syuka_dt' => [
                 'text' => '集荷日',
-                'orderBy' => ['syuka_dt']
+                'orderBy' => ['syuka_dt'],
+                'where' => function (&$qb, $table = 't_uriage') use($dateFrom, $dateTo){
+                    if (!empty(request('exp.dt_from'))) {
+                        $qb->where("{$table}.syuka_dt", '>=', $dateFrom);
+                    }
+                    if (!empty(request('exp.dt_to'))) {
+                        $qb->where("{$table}.syuka_dt", '<=', $dateTo);
+                    }
+                }
             ],
             'haitatu_dt' => [
                 'text' => '配達日',
-                'orderBy' => ['haitatu_dt']
+                'orderBy' => ['haitatu_dt'],
+                'where' => function (&$qb, $table = 't_uriage') use($dateFrom, $dateTo){
+                    if (!empty(request('exp.dt_from'))) {
+                        $qb->where("{$table}.haitatu_dt", '>=', $dateFrom);
+                    }
+                    if (!empty(request('exp.dt_to'))) {
+                        $qb->where("{$table}.haitatu_dt", '<=', $dateTo);
+                    }
+                }
             ],
         ];
     }
@@ -85,18 +105,21 @@ class JyutyuRespository
         $tUriage = new TUriage();
         $table = $tUriage->getTable();
         $qb = $tUriage->filter($request);// $qb = new Builder();
-        $qb->select("{$table}.*");
+        $qb->select("{$table}.*", DB::raw('t_uriage.hatuti_hachaku_nm as hatuti_nm'));
         // 部門マスタ
         $qb->joinMBumon()->addSelect("bumon_nm");
         // 荷主マスタ
         $qb->joinMNinusi()->addSelect("m_ninusi.ninusi_ryaku_nm");
         // 発地着地マスタ
-        $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
-        $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
+        // $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
+        $qb->joinMHachaku();
+        // $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
+        $qb->JoinHatuti();
         // 庸車先マスタ
         //$qb->joinMYousya()->addSelect("yousya1_nm");
         // 品名マスタ, 品目マスタ
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        // $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["m_hinmei.hinmoku_cd", "hinmoku_nm"]);
         // 名称マスタ
         $qb->joinMMeisyoJyutyu()->addSelect("m_meisyo_jyutyu.meisyo_nm AS jyutyu_kbn_nm");
         $qb->joinMMeisyoTani()->addSelect("m_meisyo_tani.meisyo_nm AS tani_nm");
@@ -136,6 +159,10 @@ class JyutyuRespository
         $qb = $this->qbExport($cloneReq, $routeNm, $tUriage);
 
         // 出力方法
+        $opts = $this->getExportInjiGroupOpts();
+        $func = $opts[$cloneReq->inji_group]['where'];
+        $qb->where($func($qb));
+
         $orderBy = data_get($this->getExportInjiGroupOpts(), @$cloneReq->inji_group . ".orderBy", ['syuka_dt']);
         //$qb->whereNotNull($orderBy[0]);
         $qb->orderBy(...$orderBy);

@@ -1,51 +1,45 @@
 <?php 
 
-$formatKbn = function($row, $key) {
-    return data_get(
-        configParam('options.m_soko_hinmei.' . $key, [], 1),
-        data_get($row, $key, ''),
-    );
-};
-
-
 return [
     'base' => [
         'block' => [
-            'start' => ['col' => 'A', 'row' => 4],
-            'end' => ['col' => 'AA', 'row' => 4],
+            'start' => ['col' => 'A', 'row' => 6],
+            'end' => ['col' => 'M', 'row' => 8],
         ],
         'others' => [
-            ['col' => 'F', 'row' => 1, 'value' => date('Y/m/d H:i:s')],
+            ['col' => 'M', 'row' => 1, 'value' => date('Y/m/d H:i:s')],
         ]
     ],
     'block' => [
-        'A' => ['field' => 'ninusi_cd'],
-        'B' => ['field' => 'ninusi_nm'],
-        'C' => ['field' => 'hinmei_cd'],
-        'D' => ['field' => 'kana'],
-        'E' => ['field' => 'hinmei_nm'],
-        'F' => ['field' => 'kikaku'],
-        'G' => ['field' => 'ondo', 'value' => function($row) use($formatKbn) { return $formatKbn($row, 'ondo'); }],
-        'H' => ['field' => 'zaiko_kbn', 'value' => function($row) use($formatKbn) { return $formatKbn($row, 'zaiko_kbn'); }],
-        'I' => ['field' => 'case_cd'],
-        'J' => ['field' => 'case_nm'],
-        'K' => ['field' => 'irisu'],
-        'L' => ['field' => 'hasu_kiriage'],
-        'M' => ['field' => 'bara_tani'],
-        'N' => ['field' => 'bara_tani_nm'],
-        'O' => ['field' => 'bara_tani_juryo'],
-        'P' => ['field' => 'uke_tanka'],
-        'Q' => ['field' => 'seikyu_hinmei_cd'],
-        'R' => ['field' => 'seikyu_hinmei_nm'],
-        'S' => ['field' => 'keisan_kb', 'value' => function($row) use($formatKbn) { return $formatKbn($row, 'keisan_kb'); }],
-        'T' => ['field' => 'seikyu_keta', 'value' => function($row) use($formatKbn) { return $formatKbn($row, 'seikyu_keta'); }],
-        'U' => ['field' => 'seikyu_bunbo'],
-        'V' => ['field' => 'nieki_nyuko_tanka'],
-        'W' => ['field' => 'nieki_syuko_tanka'],
-        'X' => ['field' => 'hokanryo_kin'],
-        'Y' => ['field' => 'bumon_cd'],
-        'Z' => ['field' => 'bumon_nm'],
-        'AA' => ['field' => 'kyumin_flg', 'value' => function($row) use($formatKbn) { return $formatKbn($row, 'kyumin_flg'); }],
+        [   // row1
+            'A' => ['field' => 'ninusi_cd'],
+            'B' => ['field' => 'ninusi_nm'],
+            'C' => ['field' => 'hinmei_cd'],
+            'D' => ['field' => 'hinmei_nm'],
+            'G' => ['field' => 'case_cd'],
+            'H' => ['field' => 'case_nm'],
+            'I' => ['field' => 'irisu'],
+            'J' => ['field' => 'hasu_kiriage'],
+            'K' => ['field' => 'uke_tanka'],
+            'L' => ['field' => 'seikyu_keta'],
+            'M' => ['field' => 'nieki_nyuko_tanka'],
+        ],
+        [   // row2
+            'D' => ['field' => 'kikaku'],
+            'E' => ['field' => 'ondo'],
+            'F' => ['field' => 'keisan_kb'],
+            'G' => ['field' => 'bara_tani'],
+            'H' => ['field' => 'bara_tani_nm'],
+            'I' => ['field' => 'bara_tani_juryo'],
+            'K' => ['field' => 'hokanryo_kin'],
+            'L' => ['field' => 'seikyu_bunbo'],
+            'M' => ['field' => 'nieki_syuko_tanka'],
+        ],
+        [
+            'D' => ['field' => 'kana'],
+            'E' => ['field' => 'zaiko_kbn'],
+            'F' => ['field' => 'seikyu_hinmei_nm'],
+        ],
     ],
 
 ];

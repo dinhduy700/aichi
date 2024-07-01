@@ -788,10 +788,21 @@ return [
     'jikoku' => [
         'field' => 'jikoku',
         'title' => '配達時刻',
-        'type' => 'time',
+        // 'type' => 'time',
         'width' => 75,
         'editable' => true,
         'copitable' => true,
         'sortable' => true
     ],
+    'sime_kakutei_kbn' => [
+        'field' => 'sime_kakutei_kbn',
+        'title' => '締め解決区分',
+        'editable' => false,
+        'class' => 'size-L',
+        'width' => 100,
+        'sortable' => true,
+        'copitable' => false,
+        'align' => 'left',
+        'visible' => true,
+    ]
 ];

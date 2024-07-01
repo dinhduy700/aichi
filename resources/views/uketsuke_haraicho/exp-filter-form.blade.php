@@ -11,7 +11,7 @@
     $formId = 'uketsukeHaraichoExport';
     $rowGroupClass = ["col-12", "row", "ml-0"];
     $labelClass = ["col-12", "col-lg-1", "col-form-label"];
-    $inputClass = ["col-12", "col-lg-10", "formCol", "px-0", "input-group", "form-inline"];
+    $inputClass = ["col-12", "col-lg-10", "formCol", "input-group", "form-inline"];
     $errorClass = ["error_message", "mb-0"];
     $columns = [
         'bumon_cd' => $bumon = [

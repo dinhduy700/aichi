@@ -15,12 +15,14 @@ return [
     [
         'title' => '入庫ケース',
         'field' => 'in_case_su',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right',
     ],
     [
         'title' => '入庫端数',
         'field' => 'in_hasu',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right',
     ],
@@ -34,12 +36,14 @@ return [
     [
         'title' => '出庫ケース',
         'field' => 'out_case_su',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right',
     ],
     [
         'title' => '出庫端数',
         'field' => 'out_hasu',
+        'formatter' => 'formatNumber',
         'halign' => 'center',
         'align' => 'right',
     ],

@@ -36,7 +36,7 @@ return [
             'bumon_nm',
             'kana'
         ],
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.bumon.create')
@@ -48,28 +48,28 @@ return [
         'suggestion' => true,
         'suggestion_change' => [
             'hatuti_cd',
-            'hatuti_nm',
+            'hatuti_hachaku_nm',
             'kana'
         ], 
         'class' => 'not-pd-arrow th-60',
         'sortable' => true,
         'copitable' => true,
         'copyListHidden' => [
-            'hatuti_nm'
+            'hatuti_hachaku_nm'
         ],
         'link' => route('master.hachaku.create')
     ],
     [
-        'field' => 'hatuti_nm',
+        'field' => 'hatuti_hachaku_nm',
         'title' => '発地名',
         'editable' => true,
         'suggestion' => true,
         'suggestion_change' => [
             'hatuti_cd',
-            'hatuti_nm',
+            'hatuti_hachaku_nm',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.hachaku.create')
@@ -119,14 +119,15 @@ return [
             'ninusi_nm',
             'kana'
         ], 
-        'class' => 'not-pd-arrow th-60',
+        'class' => 'not-pd-arrow th-80',
         'sortable' => true,
         'copitable' => true,
         'copyListHidden' => [
             'ninusi_nm'
         ],
         'link' => route('master.ninusi.create'),
-        'onchange' => 'onchangeNinusi'
+        'onchange' => 'onchangeNinusi',
+        'formatterFooter' => true
     ],
     [
         'field' => 'ninusi_nm',
@@ -138,7 +139,7 @@ return [
             'ninusi_nm',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.ninusi.create'),
@@ -151,8 +152,10 @@ return [
         'editable' => true,
         'type' => 'date',
         'class' => 'th-100 not-pd-arrow',
+        'formatter' => 'formaterSyukaDt',
         'sortable' => true,
-        'copitable' => true
+        'copitable' => true,
+        'formatterFooter' => true
     ],
 
     [
@@ -193,7 +196,7 @@ return [
             'hachaku_nm',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.hachaku.create')
@@ -255,7 +258,9 @@ return [
             'hinmoku_nm',
             'hinmei_nm'
         ],
-        'link' => route('master.hinmei.create')
+        'onchange' => 'onchangeHinmeiCd',
+        'link' => route('master.hinmei.create'),
+        'formatterFooter' => true
     ],
     [
         'field' => 'hinmoku_nm',
@@ -268,7 +273,7 @@ return [
         'suggestion_checkbox' => [
             'ninusi_cd' => '荷主CDをwhere条件にする'
         ],
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.hinmei.create')
@@ -290,7 +295,7 @@ return [
         'suggestion_checkbox' => [
             'ninusi_cd' => '荷主CDをwhere条件にする'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.hinmei.create')
@@ -351,7 +356,7 @@ return [
         'field' => 'jyotai',
         'title' => '状態',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'maxlength' => 255
@@ -360,7 +365,7 @@ return [
         'field' => 'sitadori',
         'title' => '下取',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'maxlength' => 255
@@ -403,18 +408,20 @@ return [
     [
         'field' => 'unchin_kin',
         'title' => '基本運賃',
+        'formatter' => 'formatterUnchinKin',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'sortable' => true,
         'type' => 'number',
-        'maxlength' => 11
+        'maxlength' => 11,
+        'formatterFooter' => true
     ],
     [
         'field' => 'tyukei_kin',
         'title' => '中継料',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'sortable' => true,
         'type' => 'number',
@@ -424,7 +431,7 @@ return [
         'field' => 'tukoryo_kin',
         'title' => '通行料等',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'sortable' => true,
         'type' => 'number',
@@ -434,7 +441,7 @@ return [
         'field' => 'syuka_kin',
         'title' => '集荷料',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'sortable' => true,
         'type' => 'number',
@@ -444,7 +451,7 @@ return [
         'field' => 'tesuryo_kin',
         'title' => '手数料',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'copitable' => true,
         'sortable' => true,
         'type' => 'number',
@@ -479,7 +486,7 @@ return [
             'biko',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.biko.create')
@@ -495,7 +502,7 @@ return [
         'field' => 'unten_kin',
         'title' => '運転者金額',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'maxlength' => 11
@@ -586,7 +593,7 @@ return [
             'jyomuin_nm',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.jyomuin.create')
@@ -619,7 +626,7 @@ return [
             'yousya_nm',
             'kana'
         ], 
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         // 'copitable' => true,
         'link' => route('master.yousya.create')
@@ -628,7 +635,7 @@ return [
         'field' => 'yosya_tyukei_kin',
         'title' => '庸車料',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'type' => 'number',
@@ -640,7 +647,7 @@ return [
         'field' => 'yosya_tukoryo_kin',
         'title' => '通行料等',
         'editable' => true,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'type' => 'number',
@@ -650,7 +657,7 @@ return [
         'field' => 'yosya_kin_tax',
         'title' => '消費税',
         'editable' => false,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'align' => 'right',
@@ -681,14 +688,14 @@ return [
     //     'field' => 'nipou_dt',
     //     'title' => '日報日',
     //     'editable' => true,
-    //     'class' => 'size-L',
+    //     'class' => 'r-size-L',
     //     'copitable' => true
     // ],
     [
         'field' => 'nipou_no',
         'title' => '日報NO',
         'editable' => false,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => true,
         'align' => 'right'
@@ -697,7 +704,7 @@ return [
         'field' => 'uriage_den_no',
         'title' => '売上番号',
         'editable' => false,
-        'class' => 'size-L',
+        'class' => 'r-size-L',
         'sortable' => true,
         'copitable' => false,
         'align' => 'right',

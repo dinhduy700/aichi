@@ -185,7 +185,11 @@
     }
     
     function formatNyusyukoKbn(value, row, index, name) {
-      return configNyusyukoKbn[row.nyusyuko_kbn]
+      if (Object.keys(configNyusyukoKbn).includes(row.nyusyuko_kbn)) {
+        return configNyusyukoKbn[row.nyusyuko_kbn]
+      } else {
+        return row.nyusyuko_kbn;
+      }
     }
     
     $(function() {

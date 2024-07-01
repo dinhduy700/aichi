@@ -17,7 +17,9 @@ use DB;
 
 class NyuryokuController extends Controller
 {
-    //
+    const URIAGE_PG_NM = 'nyusyuko_nyuryoku';
+    const URIAGE_FUNCTON_INIT_CHECK = 'init_check';
+
     const NYUSYUKO_KBN_SUPPORT = [
         '1' => '入庫',
         '2' => '出庫',
@@ -34,11 +36,16 @@ class NyuryokuController extends Controller
 
     public function index() 
     {   
+        $init = DB::table('m_user_pg_function')
+                    ->where('user_cd', \Auth::id())
+                    ->where('pg_nm', self::URIAGE_PG_NM)
+                    ->where('function', self::URIAGE_FUNCTON_INIT_CHECK)
+                    ->first();
         $listKbn = self::NYUSYUKO_KBN_SUPPORT;
         $setting = require(app_path('Helpers/Grid/config/nyusyuko/nyuryoku/nyuryoku.php'));
         $dataInit = array_column($setting, 'field');
         $unchinMikakuteiKbn = DB::table('m_meisyo')->where('meisyo_kbn', configParam('MEISYO_KBN_UNCHINKAKUTEI'))->get();
-        return view('nyusyuko.nyuryoku.index', compact('setting', 'unchinMikakuteiKbn', 'dataInit', 'listKbn'));
+        return view('nyusyuko.nyuryoku.index', compact('setting', 'unchinMikakuteiKbn', 'dataInit', 'listKbn', 'init'));
     }
 
     public function destroy($id)
@@ -139,6 +146,7 @@ class NyuryokuController extends Controller
             if($data['head']->nyusyuko_kbn == 5) {
                 $data['setting'] = require(app_path('Helpers/Grid/config/nyusyuko/nyuryoku/nyuryoku_nyusyuko_kbn_5.php'));
             }
+            $data['initCopy'] = $this->__getDefaultInitCopy($data['setting']);
         }
         return response()->json($data);
     }
@@ -162,7 +170,8 @@ class NyuryokuController extends Controller
         return response()->json([
             'status' => 200,
             'data' => $request->all(),
-            'setting' => $setting
+            'setting' => $setting,
+            'initCopy' => $this->__getDefaultInitCopy($setting)
         ]);
     }
 
@@ -198,7 +207,43 @@ class NyuryokuController extends Controller
     }
 
     public function updateDataTable(NyusyukoInputsRequest $request) {
+        try {
+            $data = [];
+            for ($i = 1; $i <= 100; $i++) {
+                $data['choice'.$i.'_nm'] = null;
+                $data['choice'.$i.'_bool'] = null;
+                $data['choice'.$i.'_dt'] = null;
+                $data['choice'.$i.'_char'] = null;
+                $data['choice'.$i.'_num'] = null;
+            }
+            if($request->filled('nyusyuko_head.denpyo_print_kbn') && !empty($request->input('nyusyuko_head.denpyo_print_kbn')) && $request->input('nyusyuko_head.denpyo_print_kbn') != 'false') {
+                $data['choice1_nm'] = 'denpyo_print_kbn';
+                $data['choice1_bool'] = true;
+            }
+            $init = DB::table('m_user_pg_function')
+                    ->where('user_cd', \Auth::id())
+                    ->where('pg_nm', self::URIAGE_PG_NM)
+                    ->where('function', self::URIAGE_FUNCTON_INIT_CHECK)
+                    ->first();
+            if(!empty($init)) {
+                DB::table('m_user_pg_function')
+                    ->where('user_cd', \Auth::id())
+                    ->where('pg_nm', self::URIAGE_PG_NM)
+                    ->where('function', self::URIAGE_FUNCTON_INIT_CHECK)
+                    ->update($data);
+            } else {
+                $data['user_cd'] = \Auth::id();
+                $data['pg_nm'] = self::URIAGE_PG_NM;
+                $data['function'] = self ::URIAGE_FUNCTON_INIT_CHECK;
+                DB::table('m_user_pg_function')
+                    ->insert($data);
+            }
+        } catch(\Exception $e) {
+            \Log::error('ERROR UPDATE NYUSYUKO NYURYOKU ['.$e->getMessage() . ']');
+        }
         $result = $this->nyuryokuRepository->updateData($request);
+
+
         return response()->json($result);
     }
 
@@ -463,4 +508,23 @@ class NyuryokuController extends Controller
             return $savePath;
         }
     }
+
+    private function __getDefaultInitCopy($config) {
+        $data = [];
+        if(is_array($config)) {
+            foreach ($config as $key => $configValue) {
+               if(!empty($configValue['copitable'])) {
+                    $data[] = $configValue['field']; 
+                    if(!empty($configValue['copyListHidden'])) {
+                        foreach ($configValue['copyListHidden'] as $hide) {
+                            $data[] = $hide;
+                        }
+                    }
+               }
+            }
+        }
+        return $data;
+    }
+
+
 }

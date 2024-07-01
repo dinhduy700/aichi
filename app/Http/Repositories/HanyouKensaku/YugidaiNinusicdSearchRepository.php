@@ -9,12 +9,15 @@ class YugidaiNinusicdSearchRepository
 {
     public function getListWithTotalCount($request)
     {
-        $maxNinusiCd = MNinusi::select(DB::raw('MAX(CAST(ninusi_cd AS INTEGER)) AS max_ninusi_cd'), 'ninusi_cd')
-                ->whereRaw('LENGTH(ninusi_cd) = 4')->groupBy('ninusi_cd')->orderBy('max_ninusi_cd', 'DESC')->first();
+        $maxNinusiCd = MNinusi::select(DB::raw('MAX(ninusi_cd) AS max_ninusi_cd'))
+                        ->whereRaw('CHAR_LENGTH(CAST(ninusi_cd AS TEXT)) = 4')
+                        ->first();
+        $rows = MNinusi::select('ninusi_cd')
+                ->where('ninusi_cd', $maxNinusiCd->max_ninusi_cd);
+                
         return [
-            'total' => 1,
-            'rows' =>  MNinusi::select('ninusi_cd')
-                        ->where('ninusi_cd', $maxNinusiCd->ninusi_cd)
+            'total' => $rows->count(),
+            'rows' =>  $rows
         ];
     }
 }

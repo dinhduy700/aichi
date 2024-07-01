@@ -92,7 +92,14 @@ class SeikyuRepository
         $table      = $tUriage->getTable();
         $qb         = $tUriage->filter($request);// $qb = new Builder();
 
-        $qb->joinTSeikyu()
+        $qb->select([
+            "{$table}.hinmei_nm",
+            "{$table}.hachaku_nm",
+            "{$table}.ninusi_cd as t_uriage__ninusi_cd",
+            DB::raw("{$table}.hatuti_hachaku_nm as hatuti_nm"),
+        ]);
+
+        $qb->joinTSeikyu('right')
             ->addSelect([
                 "t_seikyu.zenkai_seikyu_kin", //前回御請求額
                 "t_seikyu.sousai_kin", // 相殺・値引き
@@ -134,30 +141,24 @@ class SeikyuRepository
         switch ($route) {
             case 'seikyu.seikyu_sho.exp.xls':
             case 'seikyu.seikyu_sho.exp.pdf':
+            case 'seikyu.seikyu_sho.exp.downloadPdf':
                 $qb->addSelect([
                     "{$table}.unso_dt", // 運送日
                     "{$table}.syaban", // 運送日
                     "{$table}.su", // 数量
                     "{$table}.tukoryo_kin", // 通行料等
                     DB::raw("CONCAT(m_meisyo_syasyu.meisyo_cd, m_meisyo_syasyu.meisyo_nm) as syasyu"),
+
                     DB::raw("(COALESCE({$table}.unchin_kin,0) 
                             + COALESCE({$table}.tyukei_kin,0)
                             + COALESCE({$table}.syuka_kin,0)
-                            + COALESCE({$table}.tesuryo_kin,0)
                             + COALESCE({$table}.tukoryo_kin,0)
-                            + COALESCE({$table}.nieki_kin,0)
                             ) as unchin_gokei"),
-        
                     DB::raw("(COALESCE({$table}.unchin_kin,0) 
                             + COALESCE({$table}.tyukei_kin,0)
                             + COALESCE({$table}.syuka_kin,0)
-                            + COALESCE({$table}.tesuryo_kin,0)
-                            + COALESCE({$table}.nieki_kin,0)
                             ) as kihon_unchin"),
                 ]);
-                $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
-                $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
-                $qb->joinMHinmei()->addSelect("hinmei_nm");
                 $qb->joinMMeisyoTani()->addSelect("m_meisyo_tani.meisyo_nm AS tani_nm");
                 $qb->leftJoin("m_meisyo AS m_meisyo_syasyu", function ($j) {
                     $j->on("m_syaryo.syasyu_cd", '=', "m_meisyo_syasyu.meisyo_cd");
@@ -165,7 +166,7 @@ class SeikyuRepository
                 });
                 break;
         }
-        
+
         return $qb;
     }
 
@@ -187,9 +188,50 @@ class SeikyuRepository
         switch ($routeNm) {
             case 'seikyu.seikyu_sho.exp.xls':
             case 'seikyu.seikyu_sho.exp.pdf':
+            case 'seikyu.seikyu_sho.exp.downloadPdf':
                 $qb->orderBy('t_uriage.unso_dt');
+                $qb->orderBy('t_uriage.uriage_den_no');
                 break;
         }
+        
+        return $qb;
+    }
+
+    public function getSumKinZaikoHokanryo($request)
+    {
+        $seikyuSimeDt   = data_get($request, 'seikyu_sime_dt');
+        $ninusiCds      = explode(',', data_get($request, 'list_ninusi_cd'));
+
+        $zaikoHokanryoSubquery = DB::table('t_zaiko_hokanryo')
+                                    ->select(['ninusi_cd', 'seikyu_sime_dt',
+                                        DB::raw('SUM(seki_su) AS seki_su'),
+                                        DB::raw('SUM(hokan_kin) AS hokan_kin'),
+                                        DB::raw('SUM(nyuko_su) AS nyuko_su'),
+                                        DB::raw('SUM(nyuko_kin) AS nyuko_kin'),
+                                        DB::raw('SUM(syuko_su) AS syuko_su'),
+                                        DB::raw('SUM(syuko_kin) AS syuko_kin')]
+                                    )
+                                    ->where('seikyu_sime_dt', $seikyuSimeDt)
+                                    ->whereIn('ninusi_cd', $ninusiCds)
+                                    ->groupBy('ninusi_cd', 'seikyu_sime_dt');
+
+        $qb = DB::table('t_seikyu')
+                        ->select([
+                            't_seikyu.ninusi_cd',
+                            't_seikyu.seikyu_sime_dt',
+                            'seki_su',
+                            'hokan_kin',
+                            'nyuko_su',
+                            'nyuko_kin',
+                            'syuko_su',
+                            'syuko_kin',
+                        ])
+                        ->leftJoinSub($zaikoHokanryoSubquery, 't_zaiko_hokanryo', function($j) {
+                            $j->on('t_seikyu.ninusi_cd', '=', 't_zaiko_hokanryo.ninusi_cd')
+                                ->on('t_seikyu.seikyu_sime_dt', '=', 't_zaiko_hokanryo.seikyu_sime_dt');
+                        })
+                        ->where('t_seikyu.seikyu_sime_dt', $seikyuSimeDt)
+                        ->whereIn('t_seikyu.ninusi_cd', $ninusiCds);
         
         return $qb;
     }
@@ -268,6 +310,7 @@ class SeikyuRepository
             "{$table}.uriage_den_no",
             "{$table}.ninusi_cd as ninushi_kodo",
             "{$table}.unso_dt as dt",
+            "{$table}.hinmei_nm",
             DB::raw('1 as deta_kbn'),
             DB::raw('1 as meisai_kbn'),
             DB::raw('0 as nyukin_no'),
@@ -302,7 +345,7 @@ class SeikyuRepository
 
         $qb->joinMHachaku()->addSelect("m_hachaku.hachaku_nm");
         $qb->JoinHatuti()->addSelect("m_hatuti.hachaku_nm AS hatuti_nm");
-        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["hinmei_nm", "m_hinmei.hinmoku_cd", "hinmoku_nm"]);
+        $qb->joinMHinmei('left', 'm_hinmei', true)->addSelect(["m_hinmei.hinmoku_cd", "hinmoku_nm"]);
         $qb->joinMJyomuin()->addSelect(["jyomuin_nm"]);
         $qb->joinMYousya()->addSelect(["yousya1_nm"]);
         $qb->joinMMeisyoTani()->addSelect("m_meisyo_tani.meisyo_nm AS tani_nm");

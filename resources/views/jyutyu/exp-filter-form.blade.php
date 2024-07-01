@@ -140,13 +140,13 @@
               <label @class(array_merge($labelClass))>集荷日</label>
               <div @class($inputClass)>
                 <div class="group-input">
-                  <input type="text" class="form-control size-L datepicker" name="exp[syuka_dt_from]">
-                  <div @class($errorClass)><span class=" text-danger" id="error-syuka_dt_from"></span></div>
+                  <input type="text" class="form-control size-L datepicker" name="exp[dt_from]">
+                  <div @class($errorClass)><span class=" text-danger" id="error-dt_from"></span></div>
                 </div>
                 <span class="col-form-label px-2"> ～ </span>
                 <div class="group-input">
-                  <input type="text" class="form-control size-L datepicker" name="exp[syuka_dt_to]">
-                  <div @class($errorClass)><span class=" text-danger" id="error-syuka_dt_to"></span></div>
+                  <input type="text" class="form-control size-L datepicker" name="exp[dt_to]">
+                  <div @class($errorClass)><span class=" text-danger" id="error-dt_to"></span></div>
                 </div>
               </div>
             </div>

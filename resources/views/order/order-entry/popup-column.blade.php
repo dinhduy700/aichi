@@ -17,10 +17,10 @@
     </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">
-      <input type="checkbox" class="form-check-input" name="hatuti_cd" value="1" onclick="initColumnCheckHidden(this, ['hatuti_nm'])">発地CD/発地名
+      <input type="checkbox" class="form-check-input" name="hatuti_cd" value="1" onclick="initColumnCheckHidden(this, ['hatuti_hachaku_nm'])">発地CD/発地名
       <i class="input-helper"></i>
       </label>
-      <input type="hidden" class="form-check-input" name="hatuti_nm" value="1">
+      <input type="hidden" class="form-check-input" name="hatuti_hachaku_nm" value="1">
     </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">
@@ -55,7 +55,13 @@
       </label>
       <input type="hidden" class="form-check-input" name="hachaku_nm" value="1" >
     </div>
-    
+    <div class="form-check form-check-flat form-check-primary">
+      <label class="form-check-label text-nowrap">
+      <input type="checkbox" class="form-check-input" name="syubetu_cd" value="1" onclick="initColumnCheckHidden(this, ['syubetu_nm'])">種別CD/種別名
+      <i class="input-helper"></i>
+      </label>
+      <input type="hidden" class="form-check-input" name="syubetu_nm" value="1" >
+    </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">
       <input type="checkbox" class="form-check-input" name="su" value="1" >数量
@@ -183,6 +189,13 @@
       <i class="input-helper"></i>
       </label>
       <input type="hidden" class="form-check-input" name="yousya_nm" value="1" >
+    </div>
+    <div class="form-check form-check-flat form-check-primary">
+      <label class="form-check-label text-nowrap">
+      <input type="checkbox" class="form-check-input" name="jyomuin_cd" value="1" onclick="initColumnCheckHidden(this, ['jyomuin_nm'])">運転者CD/運転者名
+      <i class="input-helper"></i>
+      </label>
+      <input type="hidden" class="form-check-input" name="jyomuin_nm" value="1" >
     </div>
     <div class="form-check form-check-flat form-check-primary">
       <label class="form-check-label text-nowrap">

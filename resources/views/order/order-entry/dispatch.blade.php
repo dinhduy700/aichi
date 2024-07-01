@@ -77,14 +77,14 @@
                 <div class="col-sm form-inline">
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_from" onchange="autoFillDate(this)"> 
+                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_from" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_syuka_dt_from]'), $('input[name=hed_syuka_dt_to]'), 1)"> 
                     </div>
                     <div class="error-message-row"></div>
                   </div>
                   <span class="px-2"> ～ </span>
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_to" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_syuka_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_syuka_dt_from]'), $('input[name=hed_syuka_dt_to]'), 2)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
@@ -142,14 +142,14 @@
                 <div class="col-sm form-inline">
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_from" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_from" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_haitatu_dt_from]'), $('input[name=hed_haitatu_dt_to]'), 1)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
                   <span class="px-2"> ～ </span>
                   <div class="group-s-input" style="display: block;">
                     <div class="group-flex">
-                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_to" onchange="autoFillDate(this)">
+                      <input type="text" class="form-control size-L-uni input1" name="hed_haitatu_dt_to" onchange="autoFillDate(this)" onblur="validateDates($('input[name=hed_haitatu_dt_from]'), $('input[name=hed_haitatu_dt_to]'), 2)">
                     </div>
                     <div class="error-message-row"></div>
                   </div>
@@ -206,6 +206,7 @@
 
               </div>
               <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="applyClearAllInput('#popupSearchModal')">クリア</button>
                 <button type="button" class="btn btn-primary" onclick="applyInitSearch()">保存</button>
                 <button type="button" class="btn btn-secondary" onclick="notAppyInitSearch()">閉じる</button>
               </div>
@@ -409,6 +410,7 @@ $(function() {
     var _fromPagePGN = -1;
     var _toPagePGN = -1;
     var hideColumns = [];
+    var _readOnlyRows = [];
     var dataMultiSort = [];
     var hScrollBarPos = -1;
 
@@ -520,7 +522,7 @@ $(function() {
 
         // after spreadsheet loaded. do something.
         for (let i = 0; i < hideColumns.length; i++) {
-            instance.jexcel.hideColumn(i);
+            instance.jexcel.hideColumn(hideColumns[i]);
         }
         $("div.fixed-table-toolbar").show();
 
@@ -541,6 +543,9 @@ $(function() {
                 }
             }
         }
+
+        // disable rows.
+        disableRow(instance);
 
         // change font size.
         $("#spreadsheet table td").css("font-size",'11pt');
@@ -658,12 +663,14 @@ $(function() {
         var rowsInfo = [];
         var key_data = [];
         _jspDataKey = [];
+        _readOnlyRows = [];
         for (let i = 0; i < dispatchData.rows.length; i++) {
             let currRow = dispatchData.rows[i];
             let currRowData = [];
             rowsInfo.push({
                 id : currRow.uriage_den_no,
             });
+            _readOnlyRows.push(currRow.sime_kakutei_kbn);
 
             Object.keys(currRow).forEach(function(key) {
                 currRowData.push(currRow[key]);
@@ -846,6 +853,21 @@ $(function() {
         }
     }
 
+    // 1.5 disable a row.
+    function disableRow(spreadSheetObj) {
+        var columns = spreadSheetObj.jexcel.getConfig().columns.length;
+        var Cell = null;
+        for (var i = 0; i < _readOnlyRows.length; i++) {
+            if (_readOnlyRows[i] == '0') {
+                continue;
+            }
+            for (var j = 0; j < columns; j++) {
+                Cell = spreadSheetObj.jexcel.getCellFromCoords(j, i);
+                $(Cell).addClass("readonly");
+            }
+        }
+    }
+
     // 2.1 clear search form.
     function clearForm() {
         $('#formUriage').find('input:not(:checkbox, :radio), select').val('');
@@ -985,6 +1007,10 @@ $(function() {
         let rowData = [];
         for (let i = 0; i < spData.length; i++) {
             if (_jspDataKey.length != spData[i].length) {
+                continue;
+            }
+            // skip save with read only data.
+            if (_readOnlyRows[i] !== '0') {
                 continue;
             }
             rowData = [];

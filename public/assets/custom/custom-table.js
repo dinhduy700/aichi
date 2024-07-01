@@ -6,7 +6,7 @@ var exportButtonAdded = false;
 var copyButtonAdded = false;
 var copyButonLeftAdded = false;
 var deleteButtonAdded = false;
-
+var copyButtonActiveAdded = false;
 var updateDataTableButtonAdded = false;
 var dataMultiSort = {};
 var eventMultiSort = false;
@@ -56,7 +56,10 @@ $.fn.customTable = function (options) {
     isShow: false,
     defaultParams: null,
     usingPaginateTop: true,
-    sortName: ''
+    sortName: '',
+    isResize: false,
+    focusAfterName: '',
+    isCopyActiveRow: false
 
   }, options);
 
@@ -95,6 +98,7 @@ $.fn.customTable = function (options) {
           },
           onPostBody: function () {
             hasChangeData = false;
+            $('#table thead th div.sortable').css('pointer-events', 'unset');
             if(isCallBack == true) {
               callbackF(resHeader);
             }
@@ -118,7 +122,6 @@ $.fn.customTable = function (options) {
               $('.fixed-table-body').scrollLeft($('.fixed-table-body').scrollLeft() + scrollAdjustment);
             });
             $('#table tbody input:not([name="btSelectItem"]), #table tbody select').on('change', function () {
-
               // suggestion popup - check validate after run bootstrapTable.updateCell
               // bootstrapTable.updateCell => because this function reset event of tag
               // re-add change event again.
@@ -150,10 +153,22 @@ $.fn.customTable = function (options) {
                     row[field] = newValue;
                     // row = newRow;
                     Object.keys(newRow).forEach(function(key) {
-                      if( (row[key] || newRow[key]) && row[key] != newRow[key]) {
+                      var flgHasChangeValue = false;
+                      if (key.endsWith('_dt') && (row[key] || newRow[key]) ) {
+                        let rowValueRPL = row[key] ? row[key].replace(/-/g, '/') : null;
+                        let newRowValueRPL = newRow[key] ? newRow[key].replace(/-/g, '/') : null;
+                        if (rowValueRPL != newRowValueRPL) {
+                          flgHasChangeValue = true;
+                        }
+                      } else if( (row[key] || newRow[key]) && (row[key] != newRow[key])   ) {
+                        flgHasChangeValue = true;
+                      }
+
+                      if(flgHasChangeValue) {
                         setTimeout(function() {
                           $row.find('[name="'+key+'"]').addClass('hasChangeValue');
                           hasChangeData = true;
+                          $('#table thead th div.sortable').css('pointer-events', 'none');
                         }, 100);
                       }
                       row[key]= newRow[key];
@@ -161,6 +176,7 @@ $.fn.customTable = function (options) {
                     setTimeout(function() {
                       $row.find('[name="'+field+'"]').addClass('hasChangeValue');
                       hasChangeData = true;
+                      $('#table thead th div.sortable').css('pointer-events', 'none');
                     }, 100);
                     tr.find('.error span').html('');
                   }).catch(function (xhr) {
@@ -174,6 +190,21 @@ $.fn.customTable = function (options) {
                       });
                     }
                   })
+              }
+            });
+            $('#table ').on('keyup', 'tfoot input', function() {
+              var row = $('#table tfoot tr');
+              var hasChangeDataFooter = false;
+              row.find('input, select').each(function () {
+                var value = $(this).val();
+                if (value != null && value.trim() !== '') {
+                  hasChangeDataFooter = true;
+                  $('#table thead th div.sortable').css('pointer-events', 'none');
+                  return ;
+                } 
+              });
+              if(hasChangeDataFooter == false && hasChangeData == false) {
+                $('#table thead th div.sortable').css('pointer-events', 'unset');
               }
             });
             $('#table tbody, #table tfoot').on('keydown', 'input:not("checkbox"), select', function(event) {
@@ -260,6 +291,7 @@ $.fn.customTable = function (options) {
               }
 
             }
+
             // console.log($('#table').bootstrapTable('getOptions'));
 
 
@@ -339,6 +371,11 @@ $.fn.customTable = function (options) {
               openColumnSelectionPopup();
             }
 
+            // if(settings.isCopyActiveRow == true && !copyButtonActiveAdded) {
+            //   addCopyButtonActiveRow();
+            //   copyButtonActiveAdded = true;
+            // }
+
             if (settings.isDelete == true && !deleteButtonAdded) {
               addDeleteDataTable();
               deleteButtonAdded = true;
@@ -386,6 +423,7 @@ $.fn.customTable = function (options) {
                   var value = $(this).val();
                   if (value != null && value.trim() !== '') {
                     hasChangeData = true;
+                    $('#table thead th div.sortable').css('pointer-events', 'none');
                   }
                 });
 
@@ -395,7 +433,6 @@ $.fn.customTable = function (options) {
                     pageActive.addClass('active');
                     return false;
                   }
-                  alert(2);
                 }
                 if (pageActive == 1) {
                   $('#table').bootstrapTable('selectPage', $('#table').bootstrapTable('getOptions').totalPages);
@@ -412,6 +449,7 @@ $.fn.customTable = function (options) {
                   var value = $(this).val();
                   if (value != null && value.trim() !== '') {
                     hasChangeData = true;
+                    $('#table thead th div.sortable').css('pointer-events', 'none');
                   }
                 });
                 if(hasChangeData == true) {
@@ -435,6 +473,7 @@ $.fn.customTable = function (options) {
                   var value = $(this).val();
                   if (value != null && value.trim() !== '') {
                     hasChangeData = true;
+                    $('#table thead th div.sortable').css('pointer-events', 'none');
                   }
                 });
                 if(hasChangeData == true ) {
@@ -450,6 +489,27 @@ $.fn.customTable = function (options) {
                 $('#table').bootstrapTable('selectPage', parseInt($(this).text()));
               });
             }
+            if(settings.isResize == true) {
+              $('#table').colResizable({ disable: true });
+              $('#table').colResizable({
+                liveDrag: true,
+                resizeMode:'overflow'
+              });
+            }
+
+            $('#table input').on('focus', function() {
+              clearTimeout(letTimeout);
+            });
+
+            $('#table').on('focus', 'input', function() {
+              flagOutFocus = false;
+            });
+
+            $('#table').on('change', 'tfoot input', function() {
+              $(this).addClass('hasChangeValue');
+            });
+
+            $('#table [name="btSelectItem"]').attr('tabindex', -1);
           },
 
           showColumns: settings.showColumns,
@@ -1078,7 +1138,7 @@ $.fn.customTable = function (options) {
           }
         }
         if (column.suggestion) {
-          return '<td><div class="div-row" data-field="' + column.field + '"><input onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" type="text" onBlur="suggestionBlur(this)" onKeyup="suggestionKeyup(this)" class="form-control" name="' + column.field + '" value="" placeholder="' + column.title + '" autocomplete="off"><div class="error error-' + column.field + '"><span class="text-danger"></span></div></div></td>';
+          return '<td><div class="div-row" data-field="' + column.field + '"><input onfocus="setCellFocusStatus($(this), true)" type="text" onBlur="outFocusSuggestion(this), setCellFocusStatus($(this), false), suggestionBlur(this)" onKeyup="suggestionKeyup(this)" class="form-control" name="' + column.field + '" value="" placeholder="' + column.title + '" autocomplete="off"><div class="error error-' + column.field + '"><span class="text-danger"></span></div></div></td>';
         }
         if (column.type == 'date') {
           return '<td><div class="div-row" data-field="' + column.field + '"><input onblur="setCellFocusStatus($(this), false)" onfocus="setCellFocusStatus($(this), true)" type="text" class=" form-control" name="' + column.field + '" data-key="' + key + '" placeholder="' + column.title + '" autocomplete="off" onchange="autoFillDate(this)"><div class="error error-' + column.field + '"><span class="text-danger"></span></div></div></td>'
@@ -1123,7 +1183,7 @@ $.fn.customTable = function (options) {
 
 
 
-      var footerContent = '<tr><td class="checkbox-footer"><button><i class="fa fa-plus"></i></button></td>' + footerInputs + '</tr>';
+      var footerContent = '<tr><td class="checkbox-footer"><button tabindex="-1"><i class="fa fa-plus"></i></button></td>' + footerInputs + '</tr>';
 
       if ($('#table tfoot').length >= 1) {
         $('#table tfoot').html(footerContent);
@@ -1317,12 +1377,17 @@ $.fn.customTable = function (options) {
       settings.addCopyButtonLeft();
       return;
     }
+    var htmlActive = '';
+    if(settings.isCopyActiveRow) {
+      htmlActive = '<button type="button" id="copyActiveRow" class="btn btn-primary">カーソル位置の行コピー</button>';
+    }
 
     var html = `<div class="columns columns-left btn-group float-left">
       <div class="group-copy">
         <input type="text" min="" oninput="validateNumberInput(this)" id="totalRowsCopy"> 
         <span>行</span>
         <button class="btn btn-primary min-wid-110" id="buttonCopyLeft">行コピー</button>
+        ${htmlActive}
         <button class="btn btn-secondary min-wid-110" id="settingButtonCopyLeft">複写列選択</button>
       </div>
      </div>`;
@@ -1358,6 +1423,12 @@ $.fn.customTable = function (options) {
           $('#totalRowsCopy').val('');
           $('#table').bootstrapTable('append', copiedRow);
           $('#table').bootstrapTable('uncheckAll');
+          if(settings.focusAfterName) {
+            $('#table tbody tr:last-of-type [name="'+settings.focusAfterName+'"]').focus();
+            setTimeout(function() { 
+              $('#table tbody input[name="btSelectItem"]').attr('tabindex', -1);
+            }, 100)
+          }
         }
       }
       // Xử lý logic copy dựa trên totalRowsCopy và danh sách trường
@@ -1378,6 +1449,39 @@ $.fn.customTable = function (options) {
     $('#settingButtonCopyLeft').click(function () {
       $('#columnSelectionModal').modal('show');
     })
+
+    $('#copyActiveRow').on('mousedown', function() {
+      var index =  $('#table tbody .cell-focus').parents('tr').index();
+      if(index != -1) {
+        var currentData = $('#table').bootstrapTable('getData')[index];
+        if(currentData) {
+          var copyableFields = settings.initCopy;
+          var totalRowsCopy = 1;
+          totalRowsCopy = $('#totalRowsCopy').val();
+          if (totalRowsCopy == '') {
+            totalRowsCopy = 1;
+          }
+          for (var j = 0; j < totalRowsCopy; j++) {
+            var copiedRow = Object.assign({}, currentData);
+            for (var key in copiedRow) {
+              if ((Array.isArray(copyableFields) && copyableFields.length > 0 &&  !copyableFields.includes(key)) || copyableFields == 1 ) {
+                copiedRow[key] = null;
+              }
+            }
+            $('#totalRowsCopy').val('');
+            $('#table').bootstrapTable('append', copiedRow);
+            // $('#table').bootstrapTable('uncheckAll');
+            if(settings.focusAfterName) {
+              setTimeout(function() { 
+                $('#table tbody tr:last-of-type [name="'+settings.focusAfterName+'"]').focus();
+                $('#table tbody input[name="btSelectItem"]').attr('tabindex', -1);
+              }, 100)
+            }
+          }
+          
+        }
+      }
+    });
   }
 
   function addDeleteDataTable() {
@@ -1399,6 +1503,16 @@ $.fn.customTable = function (options) {
       }
       deleteData(this);
     });
+  }
+
+  function addCopyButtonActiveRow() {
+    var html = `
+      <div class="columns columns-left btn-group float-left">
+        <button class="btn-primary btn">カーソル位置の行コピー</button>
+      </div>
+    `;
+
+    $('.fixed-table-toolbar').append(html);
   }
 
   function handleSelectionChange() {
@@ -1428,7 +1542,7 @@ function inputFormatter(value, row, index, field) {
   }
   if (columnConfig.suggestion) {
     var inputValue = value || '';
-    var input = '<div class="div-row" data-field="' + field + '"><input type="text" ' + onchange + ' onBlur="suggestionBlur(this)" onKeyup="suggestionKeyup(this)" onfocus="setCellFocusStatus($(this), true)" class="form-control" name="' + field + '" value="' + inputValue + '" autocomplete="off"><div class="error error-' + field + '"><span class="text-danger"></span></div></div>';
+    var input = '<div class="div-row" data-field="' + field + '"><input type="text" ' + onchange + ' onBlur="outFocusSuggestion(this), suggestionBlur(this)" onKeyup="suggestionKeyup(this)" onfocus="setCellFocusStatus($(this), true)" class="form-control" name="' + field + '" value="' + inputValue + '" autocomplete="off"><div class="error error-' + field + '"><span class="text-danger"></span></div></div>';
     return input;
   }
 
@@ -1629,6 +1743,9 @@ $(document).keydown(function (e) {
 
 var letTimeout;
 function suggestionKeyup(e) {
+  if (flagOutFocus == true) {
+    return;
+  }
   var settings = $('#table').data('customTableSettings');
   var currentInput = $(e);
   var currentTh = currentInput.closest('td');
@@ -1641,6 +1758,8 @@ function suggestionKeyup(e) {
     return;
   } else if (keyDownCode == 13) {
     enterItemSuggestion(e, currentTh);
+    return;
+  } else if(keyDownCode == 9) {
     return;
   }
 
@@ -1784,6 +1903,7 @@ function suggestionKeyup(e) {
                     setTimeout(function() {
                       for(var i = 0; i < updateField.length; i++) {
                         hasChangeData = true;
+                        $('#table thead th div.sortable').css('pointer-events', 'none');
                         $('#table tr').eq(index+1).find('[name="'+updateField[i]+'"]').addClass('hasChangeValue').trigger('change');
                       }
                     }, 100)
@@ -2156,8 +2276,12 @@ function onclickAdd() {
     .then(function (res) {
       var currentData = $('#table').bootstrapTable('getData');
       $('#table').bootstrapTable('append', newRow);
+      hasChangeData = true;
+      $('#table thead th div.sortable').css('pointer-events', 'none');
       row.find('.error span').html('');
       row.find('input, select').val('');
+      row.find('.hasChangeValue').removeClass('hasChangeValue');
+
     })
     .catch(function (xhr) {
       row.find('.error span').html('');
@@ -2257,3 +2381,80 @@ function setCellFocusStatus(e, active) {
     e.removeClass("cell-focus");
   }
 }
+
+var flagOutFocus = false;
+function outFocusSuggestion(e) {
+  flagOutFocus = true;
+  clearTimeout(letTimeout);
+  var currentInput = $(e);
+  var field = $(e).attr('name');
+  var value = $(e).val();
+  if(!value) {
+    return;
+  }
+  var columnConfig = $('#table').bootstrapTable('getOptions').columns[0].find(col => col.field === field);
+  if(columnConfig.url_suggestion) {
+    var urlSearch = columnConfig.url_suggestion;
+  } else {
+    var urlSearch = '';
+  }
+  if(columnConfig.otherFieldElements) {
+    var otherFieldElements = columnConfig.otherFieldElements;
+  } else {
+    var otherFieldElements = [];
+  }
+  var currentTh = $(e).closest('td');
+  var tr = $(e).parents('tr');
+  if(tr.parents('tbody').length > 0) {
+    var indexTr = tr.attr('data-index');
+    var dataRow = $('#table').bootstrapTable('getData')[indexTr];
+  } else {
+    var indexTr = -1;
+    var dataRow = {};
+  }
+  if(value != dataRow[field]) {
+    searchSuggestion(field, value, urlSearch, otherFieldElements).then(function (res) {
+      var editRowIndex = currentTh.parents('tr').attr("data-index");
+      if(res.data.length > 0) {
+        var data = res.data;
+        let results = data.filter(item => item[field] == value);
+        if(results) {
+          results = results[0];
+          var selectedField = field;
+          if (columnConfig && Array.isArray(columnConfig.suggestion_change)) {
+            var liSelectedValue = Array();
+            var updateField = Array();
+
+            for (let i = 0; i < columnConfig.suggestion_change.length; i++) {
+              var flagNotValue = false;
+              if(Array.isArray(columnConfig.suggestion_change_not_value)) {
+                if(columnConfig.suggestion_change_not_value.includes(columnConfig.suggestion_change[i])) {
+                  if(currentTh.parents('tr').find('input[name="' + columnConfig.suggestion_change[i] + '"]').val() != '') {
+                    flagNotValue = true;
+                  }
+                }
+              }
+              if(!flagNotValue) {
+                currentTh.parents('tr').find('input[name="' + columnConfig.suggestion_change[i] + '"]').val(results[columnConfig.suggestion_change[i]] || '').addClass('hasChangeValue');
+                liSelectedValue.push(results[columnConfig.suggestion_change[i]] || '');
+                updateField.push(columnConfig.suggestion_change[i]);
+                if(dataRow.hasOwnProperty(columnConfig.suggestion_change[i]) && indexTr != -1) {
+                  dataRow[columnConfig.suggestion_change[i]] = results[columnConfig.suggestion_change[i]] || '';
+                }
+              }
+            }
+          }
+          currentTh.find('.error span').html('');
+          $('#table .suggestion').remove();
+          suggestionSelected = true;
+        }
+      }
+    })
+  }
+}
+
+$('#table').on('keyup', 'input', function(event) {
+  if(event.keyCode == 9) {
+    event.target.select();
+  }
+});

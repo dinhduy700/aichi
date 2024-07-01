@@ -59,7 +59,7 @@ class NyusyukoNipouRepository
     {
         $qb = DB::query()->newQuery()->from('t_nyusyuko_head')
             ->join('t_nyusyuko_meisai', 't_nyusyuko_head.nyusyuko_den_no', '=', 't_nyusyuko_meisai.nyusyuko_den_no');
-        $qb->where('t_nyusyuko_head.kisan_dt', '>=', $request->kijyun_dt);
+        $qb->where('t_nyusyuko_head.kisan_dt', '=', $request->kijyun_dt);
 
         foreach ($request->except('_token') as $key => $value) {
             $fromTo = [

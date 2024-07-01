@@ -37,8 +37,8 @@ return [
     'out_hasu' => '出庫：端数',
     'out_su' => '出庫：総数',
     'out_jyuryo' => '出庫：重量',
-    'zaiko_case_su' => '出庫：ケース',
-    'zaiko_hasu' => '出庫：端数',
-    'zaiko_su' => '出庫：総数',
-    'zaiko_jyuryo' => '出庫：重量',
+    'zaiko_case_su' => '残高：ケース',
+    'zaiko_hasu' => '残高：端数',
+    'zaiko_su' => '残高：総数',
+    'zaiko_jyuryo' => '残高：重量',
 ];

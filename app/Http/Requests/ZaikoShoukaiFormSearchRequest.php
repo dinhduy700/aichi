@@ -23,13 +23,13 @@ class ZaikoShoukaiFormSearchRequest extends FormRequest
     {
         return [
             'search_bumon_cd' => 'required|exists:m_bumon,bumon_cd',
-            'search_bumon_nm' => 'exists:m_bumon,bumon_nm|nullable',
+            'search_bumon_nm' => 'nullable',
             'search_kisan_dt' => 'date_format:Y/m/d,Y-m-d|nullable',
             'search_ninusi_cd' => 'required|exists:m_ninusi,ninusi_cd',
-            'search_ninusi_ryaku_nm' => 'exists:m_ninusi,ninusi_ryaku_nm|nullable',
+            'search_ninusi_ryaku_nm' => 'nullable',
             'search_soko_hinmei_cd_from' => 'exists:m_soko_hinmei,hinmei_cd|nullable',
             'search_soko_hinmei_cd_to' => 'exists:m_soko_hinmei,hinmei_cd|nullable',
-            'search_soko_hinmei_nm' => 'exists:m_soko_hinmei,hinmei_nm|nullable',
+            'search_soko_hinmei_nm' => 'nullable',
             'search_soko_cd_from' => 'exists:m_soko,soko_cd|nullable',
             'search_soko_cd_to' => 'exists:m_soko,soko_cd|nullable',
         ];

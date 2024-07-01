@@ -123,7 +123,7 @@ return [
                 'zaikoListFilterForm' => '在庫一覧表'
             ],
             'nyuryoku' => [
-                'index' => '●入出庫入力'
+                'index' => '入出庫入力'
             ]
         ],
         'seikyu' => [
@@ -166,11 +166,11 @@ return [
         ],
         'uketsuke_haraicho' => [
             'exp' => [
-                'filterForm' => '●受払元帳'
+                'filterForm' => '受払元帳'
             ]
         ],
         'hanyou_kensaku' => [
-            'index' => '●汎用検索'
+            'index' => '汎用検索'
         ],
         'zaiko_shoukai' => [
             'index' => '在庫照会',

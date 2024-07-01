@@ -48,7 +48,6 @@ return [
                 ['col' => 'BF', 'row' => 3, 'w' => 8, 'h' => 1],
                 ['col' => 'BN', 'row' => 3, 'w' => 2, 'h' => 1],
                 ['col' => 'E', 'row' => 5, 'w' => 3, 'h' => 1],
-                ['col' => 'H', 'row' => 5, 'w' => 8, 'h' => 1],
                 ['col' => 'E', 'row' => 7, 'w' => 3, 'h' => 1],
                 ['col' => 'H', 'row' => 7, 'w' => 8, 'h' => 1],
                 ['col' => 'P', 'row' => 7, 'w' => 13, 'h' => 1],
@@ -92,7 +91,7 @@ return [
                     $first = !empty($list) ? $list->first() : null;
                     return !empty($first) ? $first->ninusi1_nm : ' ';
                 }],
-                ['col' => 'P', 'row' => 7, 'value' => function() {
+                ['col' => 'P', 'row' => 8, 'value' => function() {
                     $format = new App\Helpers\Formatter();
                     $kisanDtFrom = data_get(request('exp'), 'kisan_dt_from');
                     $kisanDtTo = data_get(request('exp'), 'kisan_dt_to');
